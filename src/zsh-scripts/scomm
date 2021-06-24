@@ -1,0 +1,17 @@
+#! /usr/bin/env zsh
+# -*- mode: shell; sh-shell: zsh; -*-
+# ============================================================================ #
+#
+# `comm' except input is pushed through `sort' and `uniq' first.
+#
+
+zparseopts -D 1=args  2=args 3=args z=args           \
+              -check-order=args -nocheck-order=args  \
+              -output-delimiter:=args                \
+              -total=args -help=args -version=args;
+
+comm ${args[@]} <( cat ${1}|sort|uniq; ) <( cat ${2:-}|sort|uniq; );
+
+
+# ============================================================================ #
+# vim: set filetype=zsh :
