@@ -3,7 +3,7 @@
 
   inputs.nixpkgs.url = github:NixOS/nixpkgs;
 
-  outputs = { self, nixpkgs }: 
+  outputs = { self, nix, nixpkgs, ... }: 
     let
       supportedSystems = [ "x86_64-linux" "i686-linux" "aarch64-linux" ];
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems ( sys: f sys );
@@ -16,7 +16,6 @@
           let
             nix = final.nix;
           in stdenv.mkDerivation {
-
             name = "ak-core";
             src  = self;
 
@@ -30,18 +29,16 @@
               install -t $out/bin src/awk-scripts/dedup;
             '';
           };
-        };
+      };
 
-      defaultPackage = forAllSystems (sys: (import nixpkgs {
+      defaultPackage = forAllSystems ( sys: ( import nixpkgs {
         inherit sys;
         overlays = [ self.overlay nix.overlay ];
-      }).ak-core);
+      } ).ak-core );
 
-      nixosModules.ak-core =
-        { pkgs, ... }:
-        {
-          nixpkgs.overlays = [ self.overlay ];
-        };
+      nixosModules.ak-core = { pkgs, ... }: {
+        nixpkgs.overlays = [ self.overlay ];
+      };
 
-  };
+    };
 }
