@@ -33,7 +33,7 @@
 
       defaultPackage = forAllSystems ( sys: ( import nixpkgs {
         inherit sys;
-        overlays = [ self.overlay nix.overlay ];
+        overlays = [ self.overlay ];
       } ).ak-core );
 
       nixosModules.ak-core = { pkgs, ... }: {
