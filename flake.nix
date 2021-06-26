@@ -1,7 +1,7 @@
 {
   description = "A handful of useful core utilities and scripts for Linux";
 
-  inputs.nixpkgs.url = github:NixOS/nixpkgs;
+  inputs.nixpkgs.follows = "nix/nixpkgs";
 
   outputs = { self, nix, nixpkgs, ... }: 
     let
@@ -33,7 +33,7 @@
 
       defaultPackage = forAllSystems ( sys: ( import nixpkgs {
         inherit sys;
-        overlays = [ self.overlay ];
+        overlays = [ self.overlay nix.overlay ];
       } ).ak-core );
 
       nixosModules.ak-core = { pkgs, ... }: {
