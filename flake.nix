@@ -36,9 +36,11 @@
         overlays = [ self.overlay nix.overlay ];
       } ).ak-core );
 
-      nixosModules.ak-core = { pkgs, ... }: {
+      nixosModule = { pkgs, ... }: {
         nixpkgs.overlays = [ self.overlay ];
       };
+    
+      nixosModules.ak-core = self.nixosModule;
 
     };
 }
