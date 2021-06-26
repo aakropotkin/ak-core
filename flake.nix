@@ -3,27 +3,45 @@
 
   inputs.nixpkgs.url = github:NixOS/nixpkgs;
 
-  outputs = { self, nixpkgs }: {
+  outputs = { self, nixpkgs }: 
+    let
+      supportedSystems = [ "x86_64-linux" "i686-linux" "aarch64-linux" ];
+      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems ( sys: f sys );
+      version = "0.1.${nixpkgs.lib.substring 0 8 " +
+                "self.lastModifiedDate}.${self.shortRev or "dirty"}";
+    in {
 
-    packages.x86_64-linux.ak-core =
-      with import nixpkgs { system = "x86_64-linux"; };
-      stdenv.mkDerivation {
+      overlay = final: prev: {
+        ak-core = with final;
+          let
+            nix = final.nix;
+          in stdenv.mkDerivation {
 
-        name = "ak-core";
-        src  = self;
+            name = "ak-core";
+            src  = self;
 
-        depsTargetTarget = with pkgs; [ gawk ];
+            depsTargetTarget = with pkgs; [ gawk ];
 
-        installPhase = ''
-          mkdir -p $out/bin;
+            installPhase = ''
+              mkdir -p $out/bin;
 
-          install -t $out/bin src/sh-scripts/cuts;
-          install -t $out/bin src/zsh-scripts/scomm;
-          install -t $out/bin src/awk-scripts/dedup;
-        '';
-      };
+              install -t $out/bin src/sh-scripts/cuts;
+              install -t $out/bin src/zsh-scripts/scomm;
+              install -t $out/bin src/awk-scripts/dedup;
+            '';
+          };
+        };
 
-    defaultPackage.x86_64-linux = self.packages.x86_64-linux.ak-core;
+      defaultPackage = forAllSystems (sys: (import nixpkgs {
+        inherit sys;
+        overlays = [ self.overlay nix.overlay ];
+      }).ak-core);
+
+      nixosModules.ak-core =
+        { pkgs, ... }:
+        {
+          nixpkgs.overlays = [ self.overlay ];
+        };
 
   };
 }
