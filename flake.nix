@@ -25,6 +25,7 @@
               mkdir -p $out/bin;
 
               install -t $out/bin src/sh-scripts/cuts;
+              install -t $out/bin src/sh-scripts/wsmerge;
               install -t $out/bin src/zsh-scripts/scomm;
               install -t $out/bin src/awk-scripts/dedup;
             '';
