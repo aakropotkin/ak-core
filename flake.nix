@@ -27,6 +27,8 @@
               install -t $out/bin src/sh-scripts/cuts;
               install -t $out/bin src/sh-scripts/wsmerge;
               install -t $out/bin src/zsh-scripts/scomm;
+              install -t $out/bin src/zsh-scripts/is-elf-cu;
+              install -t $out/bin src/zsh-scripts/is-elf-so;
               install -t $out/bin src/awk-scripts/dedup;
             '';
           };
