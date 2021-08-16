@@ -7,10 +7,16 @@
 
 function usage() {
 MESSAGE="\
-Usage: is-elf-cu [OPTION...] FILE
-Detect if file is an ELF Compilation Unit ( conventionally a \`.o' file ).
+Usage: is-elf-ar [OPTION...] FILE
+Detect if file is an AR archive containing ELF Compilation Units
+( conventionally a \`.a' file containing \`.o' files ).
 Return code 0 indicates true, while 1 indicates false.
 Any return code other than 0 or 1 indicates an error.
+
+By default all archive members must be ELF Compilation Units to indicate true,
+an exception is made for \`__.LIBDEP' members which may appear in archives
+created using \`ar ... --record-libdeps=...' and \`ar ... -l ...' invocations
+in \`ar' versions after 2.36. See \`--any' option.
 
 The filesystem extension is not relevant for detection.
 Testing is performed by interpreting the output of the \`file' command.
@@ -18,6 +24,7 @@ Testing is performed by interpreting the output of the \`file' command.
 Summary of options:
   -v, --verbose    Print 'true' or 'false' in addition to returning 0/non-0.
   -F, --no-false   Only return non-zero for errors. Implies \`--verbose'.
+  -a, --any        Indicate true if any archive member is an ELF CU.
   -h, --help       Print this usage message.";
   echo "${MESSAGE}";
 }
@@ -29,11 +36,13 @@ Summary of options:
 
 zparseopts -D v=_verbose -verbose=_verbose   \
               F=_nofalse -no-false=_nofalse  \
+              a=_any     -any=_any           \
               h=_help    -help=_help;
 
 verbose=${#_verbose};
 nofalse=${#_nofalse};
 help=${#_help};
+any=${#_any};
 
 
 # ---------------------------------------------------------------------------- #
@@ -78,9 +87,51 @@ fi
 
 # ---------------------------------------------------------------------------- #
 
-# Checks that file is ELF, but not a shared object
+# Checks that file is an archive
 
-if file -Lb ${file}|grep -q '^ELF \(32\|64\)-bit LSB relocatable, '; then
+if file -Lb ${file}|grep -q ' ar archive$'; then
+  if test ${verbose} -gt 0; then
+    echo true;
+  fi
+  exit 0;
+else
+  if test ${verbose} -gt 0; then
+    echo false;
+    if test ${nofalse} -gt 0; then
+      exit 0;
+    fi
+  fi
+  exit 1;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+# Unpack archive members, and check if it contains ELF CUs
+
+# Make a temporary directory, delete it if the user tries to kill the script.
+tdir=$( mktemp -dt is-elf-ar-XXXX; );
+trap "rm -rf ${tdir}; exit 4;" 1 2 3 13 15;
+
+ar -x --output ${tdir} ${file};
+
+rsl=0;
+for f in $( find ${tdir}/ -not -name '__.LIBDEP' -not -type d; ); do
+  if file -Lb ${f}|grep -q '^ELF \(32\|64\)-bit LSB relocatable, '; then
+    if test ${any} -gt 0; then
+      rsl=0;
+      break;
+    fi
+  else
+    rsl=1;
+  fi
+done
+
+# Cleanup
+rm -rf ${tdir};
+
+# Report results
+if test ${rsl} = 0; then
   if test ${verbose} -gt 0; then
     echo true;
   fi

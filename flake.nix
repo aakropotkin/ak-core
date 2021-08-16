@@ -29,6 +29,7 @@
               install -t $out/bin src/zsh-scripts/scomm;
               install -t $out/bin src/zsh-scripts/is-elf-cu;
               install -t $out/bin src/zsh-scripts/is-elf-so;
+              install -t $out/bin src/zsh-scripts/is-elf-ar;
               install -t $out/bin src/awk-scripts/dedup;
             '';
           };

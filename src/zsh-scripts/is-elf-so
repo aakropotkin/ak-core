@@ -16,7 +16,7 @@ The filesystem extension is not relevant for detection.
 Testing is performed by interpreting the output of the \`file' command.
 
 Summary of options:
-  -v, --verbose    Print "true" or "false" in addition to returning 0/non-0.
+  -v, --verbose    Print 'true' or 'false' in addition to returning 0/non-0.
   -F, --no-false   Only return non-zero for errors. Implies \`--verbose'.
   -h, --help       Print this usage message.";
   echo "${MESSAGE}";
@@ -79,6 +79,7 @@ fi
 # ---------------------------------------------------------------------------- #
 
 # Checks that file is ELF, but not a shared object
+
 if file -Lb ${file}|grep -q '^ELF \(32\|64\)-bit LSB shared object, '; then
   if test ${verbose} -gt 0; then
     echo true;
