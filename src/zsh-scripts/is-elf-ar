@@ -95,12 +95,7 @@ fi
 
 # Checks that file is an archive
 
-if file -Lb ${file}|grep -q ' ar archive$'; then
-  if test ${verbose} -gt 0; then
-    echo true;
-  fi
-  exit 0;
-else
+if ! file -Lb ${file}|grep -q ' ar archive$'; then
   if test ${verbose} -gt 0; then
     echo false;
     if test ${nofalse} -gt 0; then
@@ -109,7 +104,6 @@ else
   fi
   exit 1;
 fi
-
 
 # ---------------------------------------------------------------------------- #
 
@@ -125,9 +119,9 @@ if test ${simple} -gt 0; then
       rsl=1;
     fi
   else
-    # If any object other than `__.LIBDEPS' has an extension other than `.o',
+    # If any object other than `__.LIBDEP' has an extension other than `.o',
     # return false.
-    if ar t ${file}|grep -qv '\(__\.LIBDEPS\|\.o\)$'; then
+    if ar t ${file}|grep -qv '\(__\.LIBDEP\|\.o\)$'; then
       rsl=1;
     fi
   fi
