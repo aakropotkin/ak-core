@@ -18,13 +18,17 @@ an exception is made for \`__.LIBDEP' members which may appear in archives
 created using \`ar ... --record-libdeps=...' and \`ar ... -l ...' invocations
 in \`ar' versions after 2.36. See \`--any' option.
 
-The filesystem extension is not relevant for detection.
-Testing is performed by interpreting the output of the \`file' command.
+By default the filesystem extension is not relevant for detection,
+testing is performed by interpreting the output of the \`file' command.
+Use of the \`--simple' option overrides this default allowing for faster
+detection by naively assuming any \`.o' members are ELF Compilation Units.
+
 
 Summary of options:
   -v, --verbose    Print 'true' or 'false' in addition to returning 0/non-0.
   -F, --no-false   Only return non-zero for errors. Implies \`--verbose'.
   -a, --any        Indicate true if any archive member is an ELF CU.
+  -s, --simple     Assume \`.o' members are ELF CU files for fast checking.
   -h, --help       Print this usage message.";
   echo "${MESSAGE}";
 }
@@ -37,12 +41,14 @@ Summary of options:
 zparseopts -D v=_verbose -verbose=_verbose   \
               F=_nofalse -no-false=_nofalse  \
               a=_any     -any=_any           \
+              s=_simple  -simple=_simple     \
               h=_help    -help=_help;
 
 verbose=${#_verbose};
 nofalse=${#_nofalse};
-help=${#_help};
 any=${#_any};
+simple=${#_simple};
+help=${#_help};
 
 
 # ---------------------------------------------------------------------------- #
@@ -102,6 +108,45 @@ else
     fi
   fi
   exit 1;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+# Handle `--simple' option
+
+if test ${simple} -gt 0; then
+
+  rsl=0;
+
+  if test ${any} -gt 0; then
+    # If no objects end in `.o' extension, return false.
+    if ! ar t ${file}|grep -q '\.o$'; then
+      rsl=1;
+    fi
+  else
+    # If any object other than `__.LIBDEPS' has an extension other than `.o',
+    # return false.
+    if ar t ${file}|grep -qv '\(__\.LIBDEPS\|\.o\)$'; then
+      rsl=1;
+    fi
+  fi
+
+  # Return result.
+  if test ${rsl} = 0; then
+    if test ${verbose} -gt 0; then
+      echo true;
+    fi
+    exit 0;
+  else
+    if test ${verbose} -gt 0; then
+      echo false;
+      if test ${nofalse} -gt 0; then
+        exit 0;
+      fi
+    fi
+    exit 1;
+  fi
 fi
 
 
