@@ -1,2 +1,2 @@
 #! /usr/bin/env sh
-w -oush|grep -Eo ' :[0-9]+'|sort|uniq;
+ls /tmp/.X11-unix|tr 'X' ':';
