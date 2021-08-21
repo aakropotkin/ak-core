@@ -1,0 +1,2 @@
+#! /usr/bin/env sh
+cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
