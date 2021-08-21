@@ -1,0 +1,108 @@
+#! /usr/bin/env zsh
+# -*- mode: shell; sh-shell: zsh; -*-
+# ============================================================================ #
+
+
+# ---------------------------------------------------------------------------- #
+
+function usage() {
+MESSAGE="\
+Usage: has-stls-so [OPTION...] FILE
+Detect if an ELF Shared Object is marked for as using Static TLS.
+Return code 0 indicates true, while 1 indicates false.
+Any return code other than 0 or 1 indicates an error.
+
+The filesystem extension is not relevant for detection.
+Testing is performed by interpreting the output of the \`file' command.
+
+Summary of options:
+  -v, --verbose    Print 'true' or 'false' in addition to returning 0/non-0.
+  -F, --no-false   Only return non-zero for errors. Implies \`--verbose'.
+  -h, --help       Print this usage message.";
+  echo "${MESSAGE}";
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# Parse options
+
+zparseopts -D v=_verbose -verbose=_verbose   \
+              F=_nofalse -no-false=_nofalse  \
+              h=_help    -help=_help;
+
+verbose=${#_verbose};
+nofalse=${#_nofalse};
+help=${#_help};
+
+
+# ---------------------------------------------------------------------------- #
+
+# Show Usage if requested
+
+if test ${help} -gt 0; then
+  usage;
+  exit 0;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+# Parse remaining arguments
+
+file=${1};
+shift;
+
+# `--no-false' implies `--verbose'
+if test ${nofalse} -gt 0; then
+  verbose=1;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+# Catch Errors
+
+if ! test -e ${file}; then
+  echo "No such file : ${file}!" >&2;
+  exit 2;
+fi
+
+if test ${#} -gt 0; then
+  echo "Too many arguments were provided!" >&2;
+  usage >&2;
+  exit 3;
+fi
+
+if ! file -Lb ${file}|grep -q '^ELF \(32\|64\)-bit LSB shared object, '; then
+  echo "${file} is not an ELF Shared Object!" >&2;
+  exit 4;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+# Checks that file is ELF, but not a shared object
+
+if readelf -Wd ${file}|grep -q 'FIXME'
+  if test ${verbose} -gt 0; then
+    echo true;
+  fi
+  exit 0;
+else
+  if test ${verbose} -gt 0; then
+    echo false;
+    if test ${nofalse} -gt 0; then
+      exit 0;
+    fi
+  fi
+  exit 1;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+
+
+# ============================================================================ #
+# vim: set filetype=zsh :
