@@ -1,0 +1,59 @@
+#! /usr/bin/env sh
+# -*- mode: sh; -*-
+# ============================================================================ #
+#
+# Version: 0.0.0
+#
+# Create a DOT dependency graph from a list of objects.
+#
+# USAGE: depgraph [-b] FILE... > OUTFILE
+# USAGE: depgraph -b foo.o bar.a libbaz.so > graph.dot
+#
+# OPTIONS:
+#   -b    Use object basenames in output
+#
+#
+# ---------------------------------------------------------------------------- #
+#
+# Graphs can be rendered using :
+#
+#   dot -Tpng FILE > OUTFILE;
+#   feh OUTFILE;
+#
+#
+# ---------------------------------------------------------------------------- #
+
+if test "${1}" = '-b'; then
+  shift;
+  lorder ${@}|awk '
+    function basename( fpath, a, n ) {
+      n = split( fpath, a, "/" );
+      return a[n];
+    }
+    BEGIN { print "digraph {"; }
+    {
+      if ( $1 != $2 ) {
+        print "  \"" basename( $2 ) "\" -> \"" basename( $1 ) "\";";
+      }
+    }
+    END { print "}"; }
+  ';
+else
+  lorder ${@}|awk '
+    BEGIN { print "digraph {"; }
+    {
+      if ( $1 != $2 ) {
+        print "  \"" $2 "\" -> \"" $1 "\";";
+      }
+    }
+    END { print "}"; }
+  ';
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+
+
+# ============================================================================ #
+# vim: set filetype=sh :
