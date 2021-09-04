@@ -1,7 +1,7 @@
-m4_define([PS_TEST_YES], [test "$1" = yes ||  eval "test \"\${$1}\" = yes"])
-m4_define([PS_TEST_NO], [test "$1" = no || eval "test \"\${$1}\" = no"])
-m4_define([PS_IF_YES], [AS_IF([PS_TEST_YES([$1])], [$2], [$3])])
-m4_define([PS_IF_NO], [AS_IF([PS_TEST_NO([$1])], [$2], [$3])])
+m4_define([PS_TEST_TRUE], [test "$1" = true ||  eval "test \"\${$1}\" = true"])
+m4_define([PS_TEST_FALSE], [test "$1" = false || eval "test \"\${$1}\" = false"])
+m4_define([PS_IF_TRUE], [AS_IF([PS_TEST_TRUE([$1])], [$2], [$3])])
+m4_define([PS_IF_FALSE], [AS_IF([PS_TEST_FALSE([$1])], [$2], [$3])])
 
 m4_define([_m4_divert(DEFAULTS)],        10)
 m4_define([_m4_divert(PARSE_ARGS)],      20)
