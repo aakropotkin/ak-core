@@ -17,7 +17,7 @@ SRC_AWK_SCRIPTS := $(addprefix $(SRCDIR)/awk-scripts/,$(AWK_SCRIPTS))
 SH_SCRIPTS  = cuts displays joinlines wsmerge lorder depgraph
 SRC_SH_SCRIPTS := $(addprefix $(SRCDIR)/sh-scripts/,$(SH_SCRIPTS))
 
-M4SH_SCRIPTS = needs
+M4SH_SCRIPTS = needs soname rpath
 SRC_M4SH_SCRIPTS := $(addprefix $(SRCDIR)/sh-scripts/,$(M4SH_SCRIPTS))
 SRC_M4SH_SCRIPTS := $(addsuffix .m4sh,$(SRC_M4SH_SCRIPTS))
 
