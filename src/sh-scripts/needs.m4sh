@@ -1,0 +1,3 @@
+AS_INIT
+m4_include([elf.m4])
+ELF_GET_ENTRY([${1}], [NEEDED])

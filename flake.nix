@@ -19,21 +19,11 @@
             name = "ak-core";
             src  = self;
 
+            buildInputs = with pkgs; [autoconf];
             depsTargetTarget = with pkgs; [ gawk ];
 
             installPhase = ''
-              mkdir -p $out/bin;
-
-              install -t $out/bin src/sh-scripts/cuts;
-              install -t $out/bin src/sh-scripts/wsmerge;
-              install -t $out/bin src/sh-scripts/displays;
-              install -t $out/bin src/sh-scripts/joinlines;
-              install -t $out/bin src/zsh-scripts/scomm;
-              install -t $out/bin src/zsh-scripts/is-elf-cu;
-              install -t $out/bin src/zsh-scripts/is-elf-so;
-              install -t $out/bin src/zsh-scripts/is-elf-ar;
-              install -t $out/bin src/zsh-scripts/syms;
-              install -t $out/bin src/awk-scripts/dedup;
+              make OUTDIR=$out all;
             '';
           };
       };
