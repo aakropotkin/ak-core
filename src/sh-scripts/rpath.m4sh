@@ -1,6 +1,6 @@
-AS_INIT
 m4_include([elf.m4])
 m4_include([util.m4])
+AS_INIT
 
 # `-S' argument splits path output onto lines.
 AS_VAR_IF([1],
@@ -9,7 +9,11 @@ AS_VAR_IF([1],
            shift],
           [AS_VAR_SET([SPLIT], [false])])
 
-m4_define([GET_RPATH], [ELF_GET_ENTRY([${1}], [R\(UN\)\?PATH])])
+AS_VAR_COPY([TARGET], [1])
+
+UTIL_ASSERT_E([AS_VAR_GET([TARGET])])
+
+m4_define([GET_RPATH], [ELF_GET_ENTRY([$TARGET], [R\(UN\)\?PATH])])
 
 AS_VAR_IF([SPLIT],
           [true],

@@ -1,3 +1,6 @@
-AS_INIT
 m4_include([elf.m4])
-ELF_GET_ENTRY([${1}], [NEEDED])
+m4_include([util.m4])
+AS_INIT
+AS_VAR_COPY([TARGET], [1])
+UTIL_ASSERT_E([$TARGET])
+ELF_GET_ENTRY([$TARGET]), [NEEDED])

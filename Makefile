@@ -42,7 +42,7 @@ $(SRC_M4SH_SCRIPTS): %: %.m4sh $(M4SHDIR)
 	autom4te -l M4sh -I$(M4SHDIR) -o $@ $<
 
 $(addprefix $(SRCDIR)/sh-scripts/,needs soname rpath): $(M4SHDIR)/elf.m4
-$(SRCDIR)/sh-scripts/rpath: $(M4SHDIR)/util.m4
+$(addprefix $(SRCDIR)/sh-scripts/,needs soname rpath): $(M4SHDIR)/util.m4
 
 $(addprefix $(BINDIR)/,$(AWK_SCRIPTS)):  $(BINDIR)/%: $(SRCDIR)/awk-scripts/%
 $(addprefix $(BINDIR)/,$(SH_SCRIPTS)):   $(BINDIR)/%: $(SRCDIR)/sh-scripts/%
