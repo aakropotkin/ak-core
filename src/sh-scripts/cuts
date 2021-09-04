@@ -51,6 +51,10 @@ shift $(( ${OPTIND} - 1 ));
 
 # ---------------------------------------------------------------------------- #
 
+# Replace all delimiters with "ACK" character, which is assumed to never appear
+# in actual inputs... because why would it?
+# `tr -s' "joins" repeated output characters, which in this case effectively
+# causes `cuts' to ignore empty fields.
 cat ${@:--}|tr -s "${delims}" $'\x06'|cut -d $'\x06' -f ${field};
 
 
