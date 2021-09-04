@@ -22,8 +22,12 @@
             buildInputs = with pkgs; [autoconf];
             depsTargetTarget = with pkgs; [ gawk ];
 
+            buildPhase = ''
+              make all;
+            '';
+
             installPhase = ''
-              make OUTDIR=$out all;
+              make OUTDIR=$out install;
             '';
           };
       };

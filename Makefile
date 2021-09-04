@@ -19,36 +19,43 @@ SRC_SH_SCRIPTS := $(addprefix $(SRCDIR)/sh-scripts/,$(SH_SCRIPTS))
 
 M4SH_SCRIPTS = needs soname rpath
 SRC_M4SH_SCRIPTS := $(addprefix $(SRCDIR)/sh-scripts/,$(M4SH_SCRIPTS))
-SRC_M4SH_SCRIPTS := $(addsuffix .m4sh,$(SRC_M4SH_SCRIPTS))
+SRC_M4SH_DEFS := $(addsuffix .m4sh,$(SRC_M4SH_SCRIPTS))
 
 ZSH_SCRIPTS = is-elf-ar is-elf-cu is-elf-so scomm syms
 SRC_ZSH_SCRIPTS := $(addprefix $(SRCDIR)/zsh-scripts/,$(ZSH_SCRIPTS))
 
 ALL_SCRIPTS := $(AWK_SCRIPTS) $(SH_SCRIPTS) $(M4SH_SCRIPTS) $(ZSH_SCRIPTS)
 SRC_ALL_SCRIPTS := $(SRC_AWK_SCRIPTS) $(SRC_SH_SCRIPTS) $(SRC_ZSH_SCRIPTS)
+SRC_ALL_SCRIPTS += $(SRC_M4SH_SCRIPTS)
 
 OUTDIR = $(TOP)/output
 BINDIR = $(OUTDIR)/bin
 
 OUT_SCRIPTS := $(addprefix $(BINDIR)/,$(ALL_SCRIPTS))
-INSTALL_SCRIPTS := $(addprefix $(BINDIR)/,$(AWK_SCRIPTS) $(SH_SCRIPTS) $(ZSH_SCRIPTS))
 
 $(BINDIR):
 	mkdir -p $@
 
 $(OUT_SCRIPTS): | $(BINDIR)
 
-$(addprefix $(BINDIR)/,$(M4SH_SCRIPTS)): $(BINDIR)/%: $(SRCDIR)/sh-scripts/%.m4sh $(M4SHDIR)
+$(SRC_M4SH_SCRIPTS): %: %.m4sh $(M4SHDIR)
 	autom4te -l M4sh -I$(M4SHDIR) -o $@ $<
 
-$(addprefix $(BINDIR)/,$(AWK_SCRIPTS)): $(BINDIR)/%: $(SRCDIR)/awk-scripts/%
-$(addprefix $(BINDIR)/,$(SH_SCRIPTS)):  $(BINDIR)/%: $(SRCDIR)/sh-scripts/%
-$(addprefix $(BINDIR)/,$(ZSH_SCRIPTS)): $(BINDIR)/%: $(SRCDIR)/zsh-scripts/%
+$(addprefix $(SRCDIR)/sh-scripts/,needs soname rpath): $(M4SHDIR)/elf.m4
+$(SRCDIR)/sh-scripts/rpath: $(M4SHDIR)/util.m4
 
-$(INSTALL_SCRIPTS):
+$(addprefix $(BINDIR)/,$(AWK_SCRIPTS)):  $(BINDIR)/%: $(SRCDIR)/awk-scripts/%
+$(addprefix $(BINDIR)/,$(SH_SCRIPTS)):   $(BINDIR)/%: $(SRCDIR)/sh-scripts/%
+$(addprefix $(BINDIR)/,$(M4SH_SCRIPTS)): $(BINDIR)/%: $(SRCDIR)/sh-scripts/%
+$(addprefix $(BINDIR)/,$(ZSH_SCRIPTS)):  $(BINDIR)/%: $(SRCDIR)/zsh-scripts/%
+
+$(OUT_SCRIPTS):
 	install -t $(BINDIR) $<
+
+all: $(SRC_ALL_SCRIPTS)
 
 clean:
 	-rm -rf $(OUTDIR)
+	-rm -f $(SRC_M4SH_SCRIPTS) $(addsuffix ~,$(SRC_M4SH_SCRIPTS))
 
-all: $(OUT_SCRIPTS)
+install: $(OUT_SCRIPTS)
