@@ -1,5 +1,4 @@
 m4_include([elf.m4])
-m4_include([util.m4])
 AS_INIT
 
 # `-S' argument splits path output onto lines.

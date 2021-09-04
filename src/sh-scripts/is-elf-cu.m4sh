@@ -1,23 +1,11 @@
+m4_include([elf.m4])
 AS_INIT
-m4_include(pred-scripts.m4)
 
-FOO=yes
-AS_IF([PS_TEST_YES([FOO])], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_YES([FOO], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_NO([FOO], [AS_ECHO([y])], [AS_ECHO([n])])
-AS_ECHO([AS_VAR_GET([FOO])])
+AS_VAR_COPY([TARGET], [$#])
+UTIL_ASSERT_E([$TARGET])
 
-AS_IF([PS_TEST_YES([BAR])], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_YES([BAR], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_NO([BAR], [AS_ECHO([y])], [AS_ECHO([n])])
-AS_ECHO([AS_VAR_GET([BAR])])
+AS_IF([ELF_IS_ELF_BIN([$TARGET])],
+      [AS_VAR_SET([IS_BIN], [true])],
+      [AS_VAR_SET([IS_BIN], [false])])
 
-AS_IF([PS_TEST_YES([yes])], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_YES([yes], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_NO([yes], [AS_ECHO([y])], [AS_ECHO([n])])
-AS_ECHO([AS_VAR_GET([yes])])
-
-AS_IF([PS_TEST_YES([no])], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_YES([no], [AS_ECHO([y])], [AS_ECHO([n])])
-PS_IF_NO([no], [AS_ECHO([y])], [AS_ECHO([n])])
-AS_ECHO([AS_VAR_GET([no])])
+UTIL_REPORT_PRED([IS_BIN])
