@@ -7,9 +7,10 @@ m4_define([ELF_GET_ENTRY],
 
 m4_define([__ELF_IS_ELF_BIN_MATCH], ['^ELF \(32\|64\)-bit LSB $1, .*'])
 m4_define([_ELF_IS_ELF_BIN_MATCH],
-  [__ELF_IS_ELF_BIN_MATCH([\(shared object\|relocatable\)])])
+  [__ELF_IS_ELF_BIN_MATCH([\(shared object\|executable\)])])
 m4_define([_ELF_IS_ELF_CU_MATCH], [__ELF_IS_ELF_BIN_MATCH([relocatable])])
 m4_define([_ELF_IS_ELF_SO_MATCH], [__ELF_IS_ELF_BIN_MATCH([shared object])])
+m4_define([_ELF_IS_ELF_EX_MATCH], [__ELF_IS_ELF_BIN_MATCH([executable])])
 
 
 m4_define([_ELF_IS_ELF_BIN],
