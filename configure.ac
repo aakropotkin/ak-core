@@ -1,0 +1,30 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ([2.71])
+AC_INIT([ak-core], [0.0.1], [alex.ameen.tx@gmail.com])
+
+AC_CONFIG_MACRO_DIRS([m4])
+AC_CONFIG_AUX_DIR([build-aux])
+
+AM_INIT_AUTOMAKE([foreign subdir-objects])
+
+AC_CONFIG_SRCDIR([src/sh-scripts/needs.m4sh])
+
+
+# Checks for programs.
+AC_PROG_AWK
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+AC_PROG_MKDIR_P
+AC_PROG_GREP
+AC_PROG_SED
+AC_PROG_AUTOM4TE
+
+AC_CONFIG_FILES([Makefile
+                 src/Makefile
+                 src/m4sugar/Makefile
+                 src/sh-scripts/Makefile
+                 src/zsh-scripts/Makefile
+                 src/awk-scripts/Makefile])
+AC_OUTPUT
