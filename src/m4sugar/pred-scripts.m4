@@ -31,6 +31,101 @@ m4_define([_m4_divert(PARSE_ARGS)],        20)
 
 # ---------------------------------------------------------------------------- #
 
+m4_define([_PS_INIT_ARGS],
+[])# _PS_INIT_ARGS
+
+
+# ---------------------------------------------------------------------------- #
+
+m4_define([_PS_STRIP_COLONS],
+[m4_bpatsubst([$1], [:], [])[]dnl
+])# _PS_STRIP_COLONS
+
+
+# ---------------------------------------------------------------------------- #
+
+# Strip colons from end of option.
+m4_define([_PS_GETOPT_GEN_NAME],
+[_PS_GETOPT_[]$1[]__[]_PS_STRIP_COLONS([$2])dnl
+])# _PS_GETOPT_GEN_NAME
+
+
+# ---------------------------------------------------------------------------- #
+
+# Get `getopt' long argument with its `:' suffix.
+m4_define([_PS_GET_GETOPT_LONG_FULL],
+_PS_GETOPT_GEN_NAME([LONG], [$1])dnl
+)# _PS_GET_GETOPT_LONG_FULL
+
+# Get `getopt' short argument with its `:' suffix.
+m4_define([_PS_GET_GETOPT_SHORT_FULL],
+_PS_GETOPT_GEN_NAME([SHORT], [$1])dnl
+)# _PS_GET_GETOPT_SHORT_FULL
+
+
+# ---------------------------------------------------------------------------- #
+
+# Set `getopt' long argument with its `:' suffix.
+m4_define([_PS_SET_GETOPT_LONG_FULL],
+[m4_define(_PS_GETOPT_GEN_NAME([LONG], [$1]), [$1])dnl
+])# _PS_GET_GETOPT_LONG_FULL
+
+# Set `getopt' short argument with its `:' suffix.
+m4_define([_PS_SET_GETOPT_SHORT_FULL],
+[m4_define(_PS_GETOPT_GEN_NAME([SHORT], [$1]), [$1])dnl
+])# _PS_GET_GETOPT_SHORT_FULL
+
+
+# ---------------------------------------------------------------------------- #
+
+# Appends `getopt' long option to collection.
+# If this option already exists its argument suffix may be updated.
+m4_define([_PS_GETOPT_LONG_OPTS_APPEND],
+[m4_set_add([_PS_GETOPT_LONG_OPTS], _PS_STRIP_COLONS([$1]))dnl
+_PS_SET_GETOPT_LONG_FULL([$1])dnl
+])# _PS_GETOPT_LONG_OPTS_APPEND
+
+# Appends `getopt' short option to collection.
+# If this option already exists its argument suffix may be updated.
+m4_define([_PS_GETOPT_SHORT_OPTS_APPEND],
+[m4_set_add([_PS_GETOPT_SHORT_OPTS], _PS_STRIP_COLONS([$1]))dnl
+_PS_SET_GETOPT_SHORT_FULL([$1])dnl
+])# _PS_GETOPT_LONG_OPTS_APPEND
+
+
+# ---------------------------------------------------------------------------- #
+
+# PS_GETOPT_OPTS_DEF(SHORT, LONG, OPT_SUFFIX)
+# User interface for defining commands.
+#
+# Ex : Define flags `-f' and `--foo' with mandatory argument.
+#   PS_GETOPT_OPTS_DEF([f], [foo], [:])
+#
+m4_define([PS_GETOPT_OPTS_DEF],
+[_PS_GETOPT_SHORT_OPTS_APPEND([$1[]$3])dnl
+_PS_GETOPT_LONG_OPTS_APPEND([$2[]$3])dnl
+])# _PS_GETOPT_OPTS_DEF
+
+
+# ---------------------------------------------------------------------------- #
+
+# Generate `getopt' command for script to evaluate.
+m4_define([_PS_GETOPT_FLAGS],
+[getopt -n $as_me -l []dnl
+m4_set_map_sep([_PS_GETOPT_LONG_OPTS],
+               [_PS_GET_GETOPT_LONG_FULL(],
+               [)],
+               [,])dnl
+ -o []dnl
+m4_set_map_sep([_PS_GETOPT_SHORT_OPTS],
+               [_PS_GET_GETOPT_SHORT_FULL(],
+               [)])dnl
+ -- $[]@dnl
+])# _PS_GETOPT_FLAGS
+
+
+# ---------------------------------------------------------------------------- #
+
 m4_define([_PS_INIT_DEFAULTS],
 [m4_divert_push([DEFAULTS])dnl
 m4_text_box([Predicate Script initialization.])

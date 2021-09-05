@@ -1,6 +1,17 @@
+# -*- mode: m4; -*-
+
 m4_include([elf.m4])
 m4_include([pred-scripts.m4])
-PS_INIT
+PS_INIT()dnl
+dnl
+#PS_GETOPT_OPTS_DEF([f], [foo], [])dnl
+#PS_GETOPT_OPTS_DEF([f], [foo], [:])dnl
+#PS_GETOPT_OPTS_DEF([b], [bar], [::])dnl
+#dnl
+##AS_ECHO(["_PS_GETOPT_FLAGS"])
+#AS_ECHO(["_PS_GETOPT_FLAGS"])
+#
+#AS_EXIT([0])
 
 declare -a opt_vars opt_shorts opt_longs opt_helps opt_args;
 
@@ -94,7 +105,7 @@ do
   eval "export ${v}=${vdefault}";
 done
 
-GETOPTCMD="$( gen_getopt_cmd; ) -n $( basename ${0}; ) -- ${@}";
+GETOPTCMD="$( gen_getopt_cmd; ) -n $as_me -- ${@}";
 
 OPTIONS=$( ${GETOPTCMD}; );
 VALID_OPTIONS=${?};
