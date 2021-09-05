@@ -1,2 +1,9 @@
-result
+result/
 output/
+build/
+Makefile.in
+aclocal.m4
+configure
+*~
+build-aux/
+autom4te.cache/

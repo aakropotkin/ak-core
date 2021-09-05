@@ -19,15 +19,15 @@
             name = "ak-core";
             src  = self;
 
-            buildInputs = with pkgs; [autoconf];
+            buildInputs = with pkgs; [autoconf automake];
             depsTargetTarget = with pkgs; [ gawk ];
 
-            buildPhase = ''
-              make all;
+            prePatch = ''
+              patchShebangs ./bootstrap.sh;
             '';
 
-            installPhase = ''
-              make OUTDIR=$out install;
+            preConfigure = ''
+              ./bootstrap.sh;
             '';
           };
       };
