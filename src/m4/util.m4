@@ -20,7 +20,7 @@ m4_define([UTIL_TEST_NE], [test ! -e $1[]])
 
 # Assert file exists.
 m4_define([UTIL_ASSERT_E],
-[AS_IF([UTIL_TEST_NE([$1])], [AS_ERROR([File does not exist: $1], 2)])])
+  [AS_IF([UTIL_TEST_NE([$1])], [AS_ERROR([File does not exist: $1], 2)])])
 
 
 # ---------------------------------------------------------------------------- #
@@ -42,22 +42,22 @@ m4_define([UTIL_PARSE_BOOL_ARG],
                         [AS_VAR_SET([$1], [false])])])])
 
 m4_define([UTIL_REPORT_PRED],
-[AS_VAR_COPY([RESULT], [$1])
+ [AS_VAR_COPY([RESULT], [$1])
 
- # Parse `-F, --no-false' flags
-# UTIL_PARSE_BOOL_ARG([FALSE_NO_ESTATUS], [-F], [--no-false])
- AS_VAR_IF([FALSE_NO_ESTATUS],
-           [true],
-           [AS_VAR_SET([FSTATUS], [0])
-            AS_VAR_SET([VERBOSE], [true])],
-           [AS_VAR_SET([FSTATUS], [1])])
+  # Parse `-F, --no-false' flags
+  # UTIL_PARSE_BOOL_ARG([FALSE_NO_ESTATUS], [-F], [--no-false])
+  AS_VAR_IF([FALSE_NO_ESTATUS],
+            [true],
+            [AS_VAR_SET([FSTATUS], [0])
+             AS_VAR_SET([VERBOSE], [true])],
+            [AS_VAR_SET([FSTATUS], [1])])
 
- # Parse `-v, --verbose' flags
-# UTIL_PARSE_BOOL_ARG([VERBOSE], [-v], [--verbose])
+  # Parse `-v, --verbose' flags
+ # UTIL_PARSE_BOOL_ARG([VERBOSE], [-v], [--verbose])
 
- AS_VAR_IF([VERBOSE], [true], [AS_ECHO([$RESULT])])
+  AS_VAR_IF([VERBOSE], [true], [AS_ECHO([$RESULT])])
 
- AS_VAR_IF([RESULT], [true], [AS_EXIT([0])], [AS_EXIT([$FSTATUS])])
+  AS_VAR_IF([RESULT], [true], [AS_EXIT([0])], [AS_EXIT([$FSTATUS])])
 ])
 
 # ---------------------------------------------------------------------------- #

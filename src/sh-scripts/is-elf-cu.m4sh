@@ -1,5 +1,6 @@
 m4_include([elf.m4])
-AS_INIT
+m4_include([pred-scripts.m4])
+PS_INIT
 
 declare -a opt_vars opt_shorts opt_longs opt_helps opt_args;
 
@@ -28,7 +29,7 @@ function gen_getopt_cmd() {
     getopt_longopt+=",${long}${arg_suffix}";
     getopt_shortopt+="${short}${arg_suffix}";
   done
-  echo "getopt -l ${getopt_longopt#,} -o ${getopt_shortopt}";
+  AS_ECHO(["getopt -l ${getopt_longopt#,} -o ${getopt_shortopt}"])
 }
 
 function defopt() {
@@ -65,11 +66,11 @@ function showopts() {
     local help="${opt_helps[[${i}]]}";
     local arg="${opt_args[[${i}]]}";
 
-    echo "Variable  : ${var}";
-    echo "Short Opt : ${short}";
-    echo "Long Opt  : ${long}";
-    echo "Help      : ${help}";
-    echo "Has Arg   : ${arg}";
+    AS_ECHO(["Variable  : ${var}"])
+    AS_ECHO(["Short Opt : ${short}"])
+    AS_ECHO(["Long Opt  : ${long}"])
+    AS_ECHO(["Help      : ${help}"])
+    AS_ECHO(["Has Arg   : ${arg}"])
   done
 }
 
@@ -94,8 +95,10 @@ do
 done
 
 GETOPTCMD="$( gen_getopt_cmd; ) -n $( basename ${0}; ) -- ${@}";
+
 OPTIONS=$( ${GETOPTCMD}; );
 VALID_OPTIONS=${?};
+
 AS_VAR_IF([VALID_OPTIONS], [0], [], [AS_EXIT([2])])
 eval set -- "${OPTIONS}";
 
@@ -122,12 +125,10 @@ do
   shift;
 done
 
-AS_ECHO([$BAZ])
-
 AS_VAR_COPY([TARGET], [1])
 UTIL_ASSERT_E([$TARGET])
 
-AS_IF([ELF_IS_ELF_BIN([$TARGET])],
+AS_IF([ELF_IS_ELF_CU([$TARGET])],
       [AS_VAR_SET([IS_BIN], [true])],
       [AS_VAR_SET([IS_BIN], [false])])
 
