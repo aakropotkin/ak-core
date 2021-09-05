@@ -2,8 +2,10 @@ result/
 output/
 build/
 Makefile.in
+Makefile
 aclocal.m4
 configure
 *~
 build-aux/
 autom4te.cache/
+config.status

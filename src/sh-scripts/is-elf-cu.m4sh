@@ -13,6 +13,14 @@ dnl
 #
 #AS_EXIT([0])
 
+UTIL_FACTORIAL([0])
+UTIL_FACTORIAL([1])
+UTIL_FACTORIAL([2])
+UTIL_FACTORIAL([3])
+UTIL_FACTORIAL([4])
+UTIL_FACTORIAL([5])
+
+
 declare -a opt_vars opt_shorts opt_longs opt_helps opt_args;
 
 opt_vars=();

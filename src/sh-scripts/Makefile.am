@@ -15,5 +15,5 @@ $(M4SH_TARGETS) is-elf-cu: %: %.m4sh
 	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $<
 
 
-$(M4SH_TARGETS): $(M4SUGAR_DIR)/elf.m4
+$(M4SH_TARGETS): $(addprefix $(M4SUGAR_DIR)/,elf.m4 util.m4)
 is-elf-cu: $(M4SUGAR_DIR)/pred-scripts.m4
