@@ -8,4 +8,4 @@ noinst_PROGRAMS = greet
 greet_SOURCES   = greet.c
 greet_LDADD     = libgreet.la
 
-TESTS = test_is_elf_cu
+#TESTS = test_is_elf_cu
