@@ -4,7 +4,7 @@ m4_include([elf.m4])
 m4_include([pred-scripts.m4])
 PS_INIT()dnl
 dnl
-#PS_GETOPT_OPTS_DEF([f], [foo], [])dnl
+PS_GETOPT_OPTS_DEF([f], [foo], [], [Foo it up])dnl
 #PS_GETOPT_OPTS_DEF([f], [foo], [:])dnl
 #PS_GETOPT_OPTS_DEF([b], [bar], [::])dnl
 #dnl
@@ -12,14 +12,6 @@ dnl
 #AS_ECHO(["_PS_GETOPT_FLAGS"])
 #
 #AS_EXIT([0])
-
-UTIL_FACTORIAL([0])
-UTIL_FACTORIAL([1])
-UTIL_FACTORIAL([2])
-UTIL_FACTORIAL([3])
-UTIL_FACTORIAL([4])
-UTIL_FACTORIAL([5])
-
 
 declare -a opt_vars opt_shorts opt_longs opt_helps opt_args;
 
