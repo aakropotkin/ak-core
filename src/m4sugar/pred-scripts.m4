@@ -1,7 +1,7 @@
-
+# -*- mode: m4; -*-
 # ============================================================================ #
-
-
+#
+#
 # ---------------------------------------------------------------------------- #
 
 m4_define([PS_TEST_TRUE], [test "$1" = true ||  eval "test \"\${$1}\" = true"])
@@ -29,17 +29,19 @@ m4_define([_m4_divert(HELP_END)],       106)
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_INIT_HELP
+# -------------
 m4_define([_PS_INIT_HELP],
 [m4_divert_push([HELP_BEGIN])dnl
 
 function usage() {
-MESSAGE="\
+echo "\
 USAGE: $as_me
-FIXME
 
 m4_divert_pop([HELP_BEGIN])dnl
 m4_divert_push([HELP_END])dnl
-";
+dnl Close MESSAGE string.
+"
 }
 
 m4_divert_pop([HELP_END])dnl
@@ -48,12 +50,16 @@ m4_divert_pop([HELP_END])dnl
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_INIT_ARGS
+# -------------
 m4_define([_PS_INIT_ARGS],
 [])# _PS_INIT_ARGS
 
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_STRIP_COLONS(STRING)
+# ------------------------
 m4_define([_PS_STRIP_COLONS],
 [m4_bpatsubst([$1], [:], [])[]dnl
 ])# _PS_STRIP_COLONS
@@ -61,6 +67,8 @@ m4_define([_PS_STRIP_COLONS],
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_GETOPT_GEN_NAME(LENGTH, OPTARG)
+# -----------------------------------
 # Strip colons from end of option.
 m4_define([_PS_GETOPT_GEN_NAME],
 [_PS_GETOPT_[]$1[]__[]_PS_STRIP_COLONS([$2])dnl
@@ -69,11 +77,16 @@ m4_define([_PS_GETOPT_GEN_NAME],
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_GET_GETOPT_LONG_FULL(OPTARG)
+# --------------------------------
 # Get `getopt' long argument with its `:' suffix.
 m4_define([_PS_GET_GETOPT_LONG_FULL],
 _PS_GETOPT_GEN_NAME([LONG], [$1])dnl
 )# _PS_GET_GETOPT_LONG_FULL
 
+
+# _PS_GET_GETOPT_SHORT_FULL(OPTARG)
+# ---------------------------------
 # Get `getopt' short argument with its `:' suffix.
 m4_define([_PS_GET_GETOPT_SHORT_FULL],
 _PS_GETOPT_GEN_NAME([SHORT], [$1])dnl
@@ -82,11 +95,16 @@ _PS_GETOPT_GEN_NAME([SHORT], [$1])dnl
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_SET_GETOPT_LONG_FULL(OPTARG)
+# --------------------------------
 # Set `getopt' long argument with its `:' suffix.
 m4_define([_PS_SET_GETOPT_LONG_FULL],
 [m4_define(_PS_GETOPT_GEN_NAME([LONG], [$1]), [$1])dnl
 ])# _PS_GET_GETOPT_LONG_FULL
 
+
+# _PS_SET_GETOPT_SHORT_FULL(OPTARG)
+# ---------------------------------
 # Set `getopt' short argument with its `:' suffix.
 m4_define([_PS_SET_GETOPT_SHORT_FULL],
 [m4_define(_PS_GETOPT_GEN_NAME([SHORT], [$1]), [$1])dnl
@@ -95,6 +113,8 @@ m4_define([_PS_SET_GETOPT_SHORT_FULL],
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_GETOPT_LONG_OPTS_APPEND(OPTARG)
+# -----------------------------------
 # Appends `getopt' long option to collection.
 # If this option already exists its argument suffix may be updated.
 m4_define([_PS_GETOPT_LONG_OPTS_APPEND],
@@ -102,6 +122,9 @@ m4_define([_PS_GETOPT_LONG_OPTS_APPEND],
 _PS_SET_GETOPT_LONG_FULL([$1])dnl
 ])# _PS_GETOPT_LONG_OPTS_APPEND
 
+
+# _PS_GETOPT_SHORT_OPTS_APPEND(OPTARG)
+# ------------------------------------
 # Appends `getopt' short option to collection.
 # If this option already exists its argument suffix may be updated.
 m4_define([_PS_GETOPT_SHORT_OPTS_APPEND],
@@ -112,6 +135,8 @@ _PS_SET_GETOPT_SHORT_FULL([$1])dnl
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_HELP_OPTS_DEF(SHORTOPT, LONGOPT, OPT_SUFFIX, HELP_MESSAGE)
+# --------------------------------------------------------------
 m4_define([_PS_HELP_OPTS_DEF],
 [m4_case([$#],
          [3], [AS_HELP_STRING([-$1, --$2], [$3])],
@@ -119,6 +144,9 @@ m4_define([_PS_HELP_OPTS_DEF],
          [[m4_fatal([$0: too few arguments: $#])]])
 ])# _PS_HELP_OPTS_DEF
 
+
+# PS_HELP_OPTS_DEF(SHORTOPT, LONGOPT, OPT_SUFFIX, OPT_SUFFIX)
+# -----------------------------------------------------------
 m4_define([PS_HELP_OPTS_DEF],
 [m4_case([$3],
          [],   [_PS_HELP_OPTS_DEF($1, $2, $4)],
@@ -131,6 +159,7 @@ m4_define([PS_HELP_OPTS_DEF],
 # ---------------------------------------------------------------------------- #
 
 # PS_GETOPT_OPTS_DEF(SHORT, LONG, OPT_SUFFIX)
+# -------------------------------------------
 # User interface for defining commands.
 #
 # Ex : Define flags `-f' and `--foo' with mandatory argument.
@@ -147,6 +176,8 @@ m4_divert_pop([HELP_OPTS])dnl
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_GETOPT_FLAGS
+# ----------------
 # Generate `getopt' command for script to evaluate.
 m4_define([_PS_GETOPT_FLAGS],
 [getopt -n $as_me -l []dnl
@@ -164,6 +195,8 @@ m4_set_map_sep([_PS_GETOPT_SHORT_OPTS],
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_INIT_DEFAULTS
+# -----------------
 m4_define([_PS_INIT_DEFAULTS],
 [m4_divert_push([DEFAULTS])dnl
 m4_text_box([Predicate Script initialization.])
@@ -186,6 +219,8 @@ m4_divert_pop([DEFAULTS])dnl
 
 # ---------------------------------------------------------------------------- #
 
+# PS_INIT
+# -------
 m4_define([PS_INIT],
 [AS_INIT[]dnl
 m4_divert_push([KILL])
@@ -194,9 +229,10 @@ _PS_INIT_DEFAULTS
 
 _PS_INIT_HELP
 
+m4_pattern_forbid([^_?PS_])
 m4_divert_pop([KILL])dnl
 m4_provide([PS_INIT])dnl
-])
+])# PS_INIT
 
 
 # ---------------------------------------------------------------------------- #
@@ -204,3 +240,4 @@ m4_provide([PS_INIT])dnl
 
 
 # ============================================================================ #
+# vim: set filetype=m4 :
