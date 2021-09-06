@@ -16,12 +16,9 @@ m4_define([_m4_divert(DEFAULTS)],          10)
 m4_define([_m4_divert(PARSE_ARGS)],        20)
 
 m4_define([_m4_divert(HELP_BEGIN)],     100)
-m4_define([_m4_divert(HELP_OPTS)],      101)
-#m4_define([_m4_divert(HELP_CANON)],     101)
-#m4_define([_m4_divert(HELP_ENABLE)],    102)
-#m4_define([_m4_divert(HELP_WITH)],      103)
-#m4_define([_m4_divert(HELP_VAR)],       104)
-#m4_define([_m4_divert(HELP_VAR_END)],   105)
+m4_define([_m4_divert(HELP_USAGE_LN)],  101)
+m4_define([_m4_divert(HELP_SUMMARY)],   102)
+m4_define([_m4_divert(HELP_OPTS)],      103)
 m4_define([_m4_divert(HELP_END)],       106)
 
 #m4_define([_m4_divert(VERSION_BEGIN)],  200)
@@ -118,7 +115,7 @@ _PS_SET_GETOPT_SHORT_FULL([$1])dnl
 m4_define([_PS_HELP_OPTS_DEF],
 [m4_case([$#],
          [3], [AS_HELP_STRING([-$1, --$2], [$3])],
-         [4], [AS_HELP_STRING([-$1 $4, --$2=$4], [$3])],
+         [4], [AS_HELP_STRING([-$1 $4, --$2[]$4], [$3])],
          [[m4_fatal([$0: too few arguments: $#])]])
 ])# _PS_HELP_OPTS_DEF
 
@@ -126,7 +123,7 @@ m4_define([PS_HELP_OPTS_DEF],
 [m4_case([$3],
          [],   [_PS_HELP_OPTS_DEF($1, $2, $4)],
          [:],  [_PS_HELP_OPTS_DEF($1, $2, $4, ARG)]
-         [::], [_PS_HELP_OPTS_DEF($1, $2, $4, [[ARG]])],
+         [::], [_PS_HELP_OPTS_DEF($1, $2, $4, [[=ARG]])],
          [m4_fatal([$0: Unrecognized option argument type: $4])])dnl
 ])# PS_HELP_OPTS_DEF
 
