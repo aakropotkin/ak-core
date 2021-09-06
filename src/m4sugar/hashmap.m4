@@ -15,18 +15,27 @@ m4_copy([m4h_keys],   [m4_set_list])
 # m4h_if_empty(HASHMAP, [IF-EMPTY], [IF-ELEMENTS])
 # ------------------------------------------------
 # Expand IF-EMPTY if SET has no elements, otherwise IF-ELEMENTS.
-m4_copy([m4h_if_empty], [m4_set_empty])dnl
+m4_copy([m4h_if_empty], [m4_set_empty])
 
 
 # ---------------------------------------------------------------------------- #
 
-# m4h_set(HASHMAP, KEY, VALUE)
-# ----------------------------
-m4_define([m4h_set], [m4_define([$1{$2}], [$3])])dnl
+# m4h_set(HASHMAP, KEY, [SUBKEY], VALUE)
+# --------------------------------------
+m4_define([m4h_set],
+[m4_ifval([$4],
+  m4_define([$1($2:$3)], [$4]),
+  m4_define([$1($2)],    [$3]))dnl
+])# m4h_set
 
-# m4h_set(HASHMAP, KEY)
-# ---------------------
-m4_define([m4h_get], [m4_defn([$1{$2}])])dnl
+
+# m4h_get(HASHMAP, KEY, [SUBKEY])
+# -------------------------------
+m4_define([m4h_get],
+[m4_ifval([$3],
+  m4_ifdef([$1($2:$3)], [m4_defn([$1($2:$3)])]),
+  m4_ifdef([$1($2)],    [m4_defn([$1($2)])]))dnl
+])# m4h_get
 
 
 # ---------------------------------------------------------------------------- #
