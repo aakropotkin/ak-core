@@ -19,7 +19,7 @@
             name = "ak-core";
             src  = self;
 
-            buildInputs = with pkgs; [autoconf automake];
+            buildInputs = with pkgs; [autoconf automake libtool];
             depsTargetTarget = with pkgs; [ gawk ];
 
             prePatch = ''
