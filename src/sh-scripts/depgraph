@@ -56,7 +56,7 @@ function do_basename() {
 }
 
 
-# Counts the occurrences of edges output by `lorder`.
+# Counts the occurrences of edges output by `lorder'.
 # These counts are associated with the number of symbols which are resolved
 # by linking those objects.
 function count_resolutions() {
