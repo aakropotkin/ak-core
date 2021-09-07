@@ -10,4 +10,12 @@ noinst_PROGRAMS = greet
 greet_SOURCES   = greet.c
 greet_LDADD     = libgreet.la
 
+libgreet_so_PATH = $(abs_builddir)/$(lt_obj_subdir)/libgreet.so
+
+.PHONY: libgreet_path
+libgreet_path: libgreet.la
+	@echo $(libgreet_so_PATH)
+	@test -x $(libgreet_so_PATH) && echo Y || echo N
+
+
 #TESTS = test_is_elf_cu

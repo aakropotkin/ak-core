@@ -28,6 +28,8 @@ AC_PROG_GREP
 AC_PROG_SED
 AC_PROG_AUTOM4TE
 
+AC_SUBST([lt_obj_subdir], ["$lt_cv_objdir"])
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/m4sugar/Makefile
