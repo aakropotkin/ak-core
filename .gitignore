@@ -9,7 +9,8 @@ configure
 build-aux/
 autom4te.cache/
 config.status
-test/
 libtool
 .lo
 .la
+.deps/
+.libs/

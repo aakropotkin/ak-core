@@ -35,6 +35,7 @@ AC_CONFIG_FILES([Makefile
                  src/m4sugar/Makefile
                  src/m4sugar/test/Makefile
                  src/sh-scripts/Makefile
+                 src/sh-scripts/test/Makefile
                  src/zsh-scripts/Makefile
                  src/awk-scripts/Makefile])
 AC_OUTPUT
