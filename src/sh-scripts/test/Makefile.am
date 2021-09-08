@@ -6,9 +6,9 @@ libgreet_la_SOURCES = hello.c howdy.c
 # This is a stupid behavior but whatever...
 libgreet_la_LDFLAGS = -rpath $(abs_builddir) $(AM_LDFLAGS)
 
-noinst_PROGRAMS = greet
-greet_SOURCES   = greet.c
-greet_LDADD     = libgreet.la
+check_PROGRAMS = greet
+greet_SOURCES  = greet.c
+greet_LDADD    = libgreet.la
 
 
 libgreet_so_PATH = $(abs_builddir)/$(lt_obj_subdir)/libgreet.so
@@ -22,13 +22,7 @@ libgreet_paths: libgreet.la
 	@test -e $(libgreet_a_PATH) && echo 'found' || echo 'not found'
 
 
-check_SCRIPTS = test_is_elf_cu.sh
-TESTS         = $(check_SCRIPTS)
-CLEANFILES    = $(check_SCRIPTS)
+check_SCRIPTS = test-is-elf-cu.sh
+TESTS = $(check_SCRIPTS)
 
-test_is_elf_cu.sh: ../is-elf-cu | hello.o howdy.o greet.o
-	echo '#! /usr/bin/env sh'          >  $@;  \
-	echo '../is-elf-cu hello.o &&  \\' >> $@;  \
-	echo '../is-elf-cu howdy.o &&  \\' >> $@;  \
-	echo '../is-elf-cu greet.o;'       >> $@
-	chmod +x $@
+test-is-elf-cu.sh: | ../is-elf-cu hello.o howdy.o greet.o

@@ -14,7 +14,6 @@ LT_INIT
 
 AC_CONFIG_SRCDIR([src/sh-scripts/needs.m4sh])
 
-
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_AWK
