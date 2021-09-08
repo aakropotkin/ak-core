@@ -10,7 +10,8 @@ build-aux/
 autom4te.cache/
 config.status
 libtool
-.lo
-.la
+*.lo
+*.la
 .deps/
 .libs/
+*.trs
