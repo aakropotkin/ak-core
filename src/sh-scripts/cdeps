@@ -1,6 +1,14 @@
 #! /usr/bin/env sh
+# -*- mode: sh-shell; -*-
+# ============================================================================ #
+
+
+# ---------------------------------------------------------------------------- #
 
 SNAME=cdeps;
+
+
+# ---------------------------------------------------------------------------- #
 
 function usage() {
   USAGE_MESSAGE="\
@@ -8,10 +16,11 @@ Usage: ${SNAME} [OPTION...] FILE [-- CFLAGS]
 Print header dependencies for C/C++ file.
 
 Options:
-  -s, --system  Include system headers in output. Equivelant to \`gcc -MM'.
-  -C, --cxx     Process as C++ file.
-  -h, --help    Print this help message.
-  -- CFLAGS     Any flags provided after \`--' are passed as compiler flags.
+  -s, --system   Include system headers in output. Equivelant to \`gcc -MM'.
+  -C, --cxx      Process as C++ file.
+  -D, --defines  Scape \`#ifdef' symbols and set all to 1.
+  -h, --help     Print this help message.
+  -- CFLAGS      Any flags provided after \`--' are passed as compiler flags.
 
 Compiler tries \`CC' or \`CXX' if \`--cxx' was indicated, if unset these fall
 back to \`gcc' and \`g++' respectively.";
@@ -28,14 +37,21 @@ back to \`gcc' and \`g++' respectively.";
   exit ${EXIT_STATUS};
 }
 
+
+# ---------------------------------------------------------------------------- #
+
 # Option settings
 TARGET='';
 SYSDEPS=no;
 DO_CXX=no;
+DEFINES=no;
 
+
+# ---------------------------------------------------------------------------- #
 
 # Split options
-OPTIONS="$( getopt -n ${SNAME} -l help -l system -l cxx -o 'shC' -- ${@}; )";
+LONG_OPTS='-l help -l system -l cxx -l defines'
+OPTIONS="$( getopt -n ${SNAME} ${LONG_OPTS} -o 'shCD' -- ${@}; )";
 VALID_OPTIONS=${?};
 
 if test ${VALID_OPTIONS} != 0; then
@@ -58,6 +74,9 @@ do
     -C|--cxx)
       DO_CXX=yes;
       ;;
+    -D|--defines)
+      DEFINES=yes;
+      ;;
     --)
       shift;
       break;
@@ -74,10 +93,25 @@ do
   shift;
 done
 
+
+# ---------------------------------------------------------------------------- #
+
+if test -z "${TARGET}"; then
+  TARGET=${1};
+  shift;
+fi
+
+# Strip off leading `./' or any other wonky pathname stuff that `CC -M' drops.
+TARGET="$( realpath --relative-to ${PWD} ${TARGET}; )";
+
+
 # Remaining args are considered compiler flags
 if test ${#} -gt 0; then
   CFLAGS="${@}";
 fi
+
+
+# ---------------------------------------------------------------------------- #
 
 if test "x${SYSDEPS}" = "xyes"; then
   CFLAGS+=" -M";
@@ -86,12 +120,22 @@ else
 fi
 
 
+# ---------------------------------------------------------------------------- #
+
 # Select compiler
 if test "x${DO_CXX}" = "xyes"; then
   CC="${CXX:-$( which g++; )}";
 else
   CC="${CC:-$( which gcc; )}";
 fi
+
+
+# ---------------------------------------------------------------------------- #
+
+function _getifnames() {
+  ifnames ${TARGET}|cut -d' ' -f1;
+}
+
 
 function _joinlines() {
   cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
@@ -103,7 +147,37 @@ function _wslines() {
 
 function _getdeps() {
   # Remove the target file and fake target.
-  ${CC} -MT '' ${TARGET} ${CFLAGS}|sed -e 's/^: //' -e 's/[^ ]\+ //';
+  # Suppress debug output from CPP.
+  ${CC} -MT '' ${TARGET} ${CFLAGS}|sed -e 's/^: //';
 }
 
-_getdeps|_joinlines|_wslines;
+function _getdeps_post() {
+  _getdeps|_joinlines|_wslines|grep -v "^${TARGET#\.#\\\.}\$";
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# Scrape `#ifdef' symbols and set all of them to 1 using `-D<NAME>'.
+# This is far from exhaustive considering that combinations of these symbols
+# might be incompatible; but this covers a large number of use cases.
+if test "x${DEFINES}" = "xyes"; then
+  # FIXME: Permutate over defines
+  #CFLAGS_SAVED="${CFLAGS}";
+  for d in $( _getifnames; ); do
+    CFLAGS+=" -D${d}";
+  done
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+_getdeps_post;
+
+
+# ---------------------------------------------------------------------------- #
+
+
+
+# ============================================================================ #
+# vim: set filetype=sh :

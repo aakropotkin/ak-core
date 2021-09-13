@@ -22,7 +22,8 @@ libgreet_paths: libgreet.la
 	@test -e $(libgreet_a_PATH) && echo 'found' || echo 'not found'
 
 
-check_SCRIPTS = test-is-elf-cu.sh
+check_SCRIPTS = test-is-elf-cu.sh test-cdeps.sh
 TESTS = $(check_SCRIPTS)
 
 test-is-elf-cu.sh: | ../is-elf-cu hello.o howdy.o greet.o
+test-cdeps.sh: | ../cdeps cdeps-a.h cdeps-b.h cdeps-c.h cdeps-a.c cdeps-c.c
