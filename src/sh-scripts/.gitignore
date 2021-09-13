@@ -2,3 +2,5 @@ is-elf-cu
 needs
 rpath
 soname
+needs.in
+soname.in
