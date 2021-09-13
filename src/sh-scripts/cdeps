@@ -1,0 +1,109 @@
+#! /usr/bin/env sh
+
+SNAME=cdeps;
+
+function usage() {
+  USAGE_MESSAGE="\
+Usage: ${SNAME} [OPTION...] FILE [-- CFLAGS]
+Print header dependencies for C/C++ file.
+
+Options:
+  -s, --system  Include system headers in output. Equivelant to \`gcc -MM'.
+  -C, --cxx     Process as C++ file.
+  -h, --help    Print this help message.
+  -- CFLAGS     Any flags provided after \`--' are passed as compiler flags.
+
+Compiler tries \`CC' or \`CXX' if \`--cxx' was indicated, if unset these fall
+back to \`gcc' and \`g++' respectively.";
+
+
+  EXIT_STATUS=${1:-2};
+
+  if test ${EXIT_STATUS} = 0; then
+    echo "${USAGE_MESSAGE}";
+  else
+    echo "${USAGE_MESSAGE}" >&2;
+  fi
+
+  exit ${EXIT_STATUS};
+}
+
+# Option settings
+TARGET='';
+SYSDEPS=no;
+DO_CXX=no;
+
+
+# Split options
+OPTIONS="$( getopt -n ${SNAME} -l help -l system -l cxx -o 'shC' -- ${@}; )";
+VALID_OPTIONS=${?};
+
+if test ${VALID_OPTIONS} != 0; then
+  echo "${SNAME}: encountered invalid options" >&2;
+  usage 2;
+fi
+
+
+# Parse options
+eval set -- "${OPTIONS}";
+while :
+do
+  case ${1} in
+    -h|--help)
+      usage 0;
+      ;;
+    -s|--system)
+      SYSDEPS=yes;
+      ;;
+    -C|--cxx)
+      DO_CXX=yes;
+      ;;
+    --)
+      shift;
+      break;
+      ;;
+    *)
+      if test -z ${TARGET}; then
+        TARGET="${1}";
+      else
+        echo "${SNAME}: unexpected option: ${1}" >&2;
+        usage 2;
+      fi
+      ;;
+  esac
+  shift;
+done
+
+# Remaining args are considered compiler flags
+if test ${#} -gt 0; then
+  CFLAGS="${@}";
+fi
+
+if test "x${SYSDEPS}" = "xyes"; then
+  CFLAGS+=" -M";
+else
+  CFLAGS+=" -MM";
+fi
+
+
+# Select compiler
+if test "x${DO_CXX}" = "xyes"; then
+  CC="${CXX:-$( which g++; )}";
+else
+  CC="${CC:-$( which gcc; )}";
+fi
+
+function _joinlines() {
+  cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
+}
+
+function _wslines() {
+  cat ${1:--}|tr -s $'\t' ' '|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
+}
+
+function _getdeps() {
+  # Remove the target file and fake target.
+  ${CC} -MT '' ${TARGET} ${CFLAGS}|sed -e 's/^: //' -e 's/[^ ]\+ //';
+}
+
+_getdeps|_joinlines|_wslines;

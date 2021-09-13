@@ -1,0 +1,2 @@
+#! /usr/bin/env sh
+cat ${1:--}|tr -s $'\t' ' '|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
