@@ -1,6 +1,6 @@
 
 bin_SCRIPTS =  cuts depgraph displays joinlines lorder wsmerge
-bin_SCRIPTS += cdeps trim wslines
+bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames
 
 # M4SH generated scripts
 M4SH_TARGETS =  needs rpath soname

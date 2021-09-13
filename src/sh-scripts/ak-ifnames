@@ -1,0 +1,32 @@
+#! /usr/bin/env sh
+# Unlike the `autoconf' version of `ifnames' this script does not
+# print filenames.
+
+TARGET=${1};
+shift;
+
+function _joinlines() {
+  cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
+}
+
+function _matchpp() {
+  cat ${1:--}|grep '^\s*\#\s*\(if\|ifdef\|ifndef\|elif\)\s*';
+}
+
+function _strippp() {
+  cat ${1:--}|sed 's:^\s*\#\s*\(if\|ifdef\|ifndef\|elif\)\s\+::';
+}
+
+function _rmcomments() {
+  cat ${1:--}|sed -e 's:/\*.*?\*/::g' -e 's:/\*.*$::' -e 's://.*$::';
+}
+
+function _wslines() {
+  cat ${1:--}|tr -s $'\t' ' '|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
+}
+
+function _getsymbols() {
+  cat ${1:--}|grep '^[a-zA-Z_][a-zA-Z1-9_]*$';
+}
+
+_joinlines ${TARGET}|_matchpp|_strippp|_rmcomments|_wslines|_getsymbols;
