@@ -23,7 +23,11 @@ libgreet_paths: libgreet.la
 
 
 check_SCRIPTS = test-is-elf-cu.sh test-cdeps.sh
-TESTS = $(check_SCRIPTS)
+TESTS = test-is-elf-cu.sh test-cdeps.sh
+
+# FIXME: This is only here temporarily until M4SH version of this script
+# replaces the existing Zsh script.
+check_SCRIPTS += ../is-elf-cu
 
 test-is-elf-cu.sh: | ../is-elf-cu hello.o howdy.o greet.o
 test-cdeps.sh: | ../cdeps cdeps-a.h cdeps-b.h cdeps-c.h cdeps-a.c cdeps-c.c

@@ -1,5 +1,4 @@
 #! /usr/bin/env sh
-export PATH=..:$PATH;
 SCRIPT=is-elf-cu;
 for obj in hello.o howdy.o greet.o; do
   if ! is-elf-cu $obj; then

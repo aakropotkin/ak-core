@@ -13,7 +13,6 @@ M4SUGAR_DIR = $(top_srcdir)/src/m4sugar
 
 AUTOM4TE_FLAGS = -I$(M4SUGAR_DIR) -l m4sh
 
-
 $(M4SH_TARGETS) is-elf-cu: %: %.m4sh
 	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $<
 
