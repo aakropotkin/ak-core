@@ -25,7 +25,7 @@ BUILT_SOURCES = soname.in needs.in
 CLEANFILES += $(BUILT_SOURCES)
 
 needs soname: %: dt_entry.m4sh %.in
-	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $@.in $<
+	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $*.in $<
 
 $(M4SH_TARGETS): $(addprefix $(M4SUGAR_DIR)/,elf.m4 util.m4)
 is-elf-cu: $(M4SUGAR_DIR)/pred-scripts.m4

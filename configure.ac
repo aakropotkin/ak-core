@@ -12,7 +12,7 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 LT_PREREQ([2.4.6])
 LT_INIT
 
-AC_CONFIG_SRCDIR([src/sh-scripts/needs.m4sh])
+AC_CONFIG_SRCDIR([src/sh-scripts/dt_entry.m4sh])
 
 # Checks for programs.
 AC_PROG_CC
