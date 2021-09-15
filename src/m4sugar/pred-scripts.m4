@@ -240,4 +240,4 @@ m4_provide([PS_INIT])dnl
 
 
 # ============================================================================ #
-# vim: set filetype=m4 :
+# vim: set filetype=config :

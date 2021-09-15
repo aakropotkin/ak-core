@@ -50,4 +50,4 @@ m4_define([m4h_init], [m4_pattern_forbid([^_?m4h_])])
 
 
 # ============================================================================ #
-# vim: set filetype=m4 :
+# vim: set filetype=config :
