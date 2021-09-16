@@ -5,7 +5,7 @@ bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames
 # M4SH generated scripts
 M4SH_TARGETS =  needs rpath soname
 bin_SCRIPTS  += $(M4SH_TARGETS)
-CLEANFILES   =  $(M4SH_TARGETS)
+CLEANFILES   =  $(M4SH_TARGETS) is-elf-cu
 
 SUBDIRS = test
 
