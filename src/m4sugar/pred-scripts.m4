@@ -1,19 +1,14 @@
-# -*- mode: m4; -*-
+# -*- mode: autoconf; -*-
 # ============================================================================ #
 #
 #
 # ---------------------------------------------------------------------------- #
 
-m4_define([PS_TEST_TRUE], [test "$1" = true ||  eval "test \"\${$1}\" = true"])
-m4_define([PS_TEST_FALSE], [test "$1" = false || eval "test \"\${$1}\" = false"])
-m4_define([PS_IF_TRUE], [AS_IF([PS_TEST_TRUE([$1])], [$2], [$3])])
-m4_define([PS_IF_FALSE], [AS_IF([PS_TEST_FALSE([$1])], [$2], [$3])])
-
-
-# ---------------------------------------------------------------------------- #
-
 m4_define([_m4_divert(DEFAULTS)],          10)
-m4_define([_m4_divert(PARSE_ARGS)],        20)
+m4_define([_m4_divert(PARSE_ARGS_GETOPT)], 20)
+m4_define([_m4_divert(PARSE_ARGS_BEGIN)],  21)
+m4_define([_m4_divert(PARSE_ARGS_CASES)],  22)
+m4_define([_m4_divert(PARSE_ARGS_END)],    23)
 
 m4_define([_m4_divert(HELP_BEGIN)],     100)
 m4_define([_m4_divert(HELP_USAGE_LN)],  101)
@@ -35,13 +30,14 @@ m4_define([_PS_INIT_HELP],
 [m4_divert_push([HELP_BEGIN])dnl
 
 function usage() {
-echo "\
+  echo "\
 USAGE: $as_me
 
 m4_divert_pop([HELP_BEGIN])dnl
 m4_divert_push([HELP_END])dnl
 dnl Close MESSAGE string.
 "
+  AS_EXIT([${1:-2}])
 }
 
 m4_divert_pop([HELP_END])dnl
@@ -50,10 +46,58 @@ m4_divert_pop([HELP_END])dnl
 
 # ---------------------------------------------------------------------------- #
 
+# _PS_GETOPT_GEN_CMD
+# ------------------
+# Generate `getopt' command for script to evaluate.
+m4_defun([_PS_GETOPT_GEN_CMD],
+[m4_expand([getopt -n $as_me -l ],
+           [m4_set_map_sep([_PS_GETOPT_LONG_OPTS],
+                           [_PS_GET_GETOPT_LONG_FULL(],
+                           [)],
+                           [,])],
+           [ -o ],
+           [m4_set_map_sep([_PS_GETOPT_SHORT_OPTS],
+                           [_PS_GET_GETOPT_SHORT_FULL(],
+                           [)])],
+           [ -- $[]@])dnl
+])# _PS_GETOPT_GEN_CMD
+
+
+# ---------------------------------------------------------------------------- #
 # _PS_INIT_ARGS
 # -------------
 m4_define([_PS_INIT_ARGS],
-[])# _PS_INIT_ARGS
+[m4_divert_push([PARSE_ARGS_BEGIN])
+while :
+do
+  case "${1}" in
+m4_divert_pop([PARSE_ARGS_BEGIN])dnl
+dnl
+m4_divert_push([PARSE_ARGS_END])dnl
+    --)
+      shift;
+      break;
+      ;;
+    *)
+      AS_ERROR([Unexpected option: ${1}], 2)
+      ;;
+   esac
+   shift;
+done
+m4_divert_pop([PARSE_ARGS_END])dnl
+])# _PS_INIT_ARGS
+
+
+dnl#m4_divert_push([PARSE_ARGS_GETOPT])
+dnl#_ps_getopt_OPTIONS="`
+dnl#_ps_getopt_OPTIONS_RSL=${?}
+dnl#AS_VAR_IF([_ps_getopt_OPTIONS_RSL], [0], [],
+dnl#  [AS_ERROR([getopt failed to parse options: code $_ps_getopt_OPTIONS_RSL], [2])dnl
+dnl#])
+dnl#m4_divert_pop([PARSE_ARGS_GETOPT])
+dnl#])
+dnl#eval set -- "$_ps_getopt_OPTIONS"
+dnl#])])
 
 
 # ---------------------------------------------------------------------------- #
@@ -71,7 +115,7 @@ m4_define([_PS_STRIP_COLONS],
 # -----------------------------------
 # Strip colons from end of option.
 m4_define([_PS_GETOPT_GEN_NAME],
-[_PS_GETOPT_[]$1[]__[]_PS_STRIP_COLONS([$2])dnl
+[_PS_GETOPT_[]$1[]__[]AS_TR_SH([_PS_STRIP_COLONS([$2])])dnl
 ])# _PS_GETOPT_GEN_NAME
 
 
@@ -81,16 +125,16 @@ m4_define([_PS_GETOPT_GEN_NAME],
 # --------------------------------
 # Get `getopt' long argument with its `:' suffix.
 m4_define([_PS_GET_GETOPT_LONG_FULL],
-_PS_GETOPT_GEN_NAME([LONG], [$1])dnl
-)# _PS_GET_GETOPT_LONG_FULL
+[m4_defn(_PS_GETOPT_GEN_NAME([LONG], [$1]))dnl
+])# _PS_GET_GETOPT_LONG_FULL
 
 
 # _PS_GET_GETOPT_SHORT_FULL(OPTARG)
 # ---------------------------------
 # Get `getopt' short argument with its `:' suffix.
 m4_define([_PS_GET_GETOPT_SHORT_FULL],
-_PS_GETOPT_GEN_NAME([SHORT], [$1])dnl
-)# _PS_GET_GETOPT_SHORT_FULL
+[m4_defn(_PS_GETOPT_GEN_NAME([SHORT], [$1]))dnl
+])# _PS_GET_GETOPT_SHORT_FULL
 
 
 # ---------------------------------------------------------------------------- #
@@ -166,31 +210,23 @@ m4_define([PS_HELP_OPTS_DEF],
 #   PS_GETOPT_OPTS_DEF([f], [foo], [:])
 #
 m4_define([PS_GETOPT_OPTS_DEF],
-[_PS_GETOPT_SHORT_OPTS_APPEND([$1[]$3])dnl
-_PS_GETOPT_LONG_OPTS_APPEND([$2[]$3])dnl
+[m4_do([_PS_GETOPT_SHORT_OPTS_APPEND([$1[]$3])],
+       [_PS_GETOPT_LONG_OPTS_APPEND([$2[]$3])])dnl
+dnl
 m4_divert_push([HELP_OPTS])dnl
 PS_HELP_OPTS_DEF([$1], [$2], [$3], [$4])dnl
 m4_divert_pop([HELP_OPTS])dnl
+dnl
+m4_divert_push([PARSE_ARGS_CASES])dnl
+    -$1|--$2)
+      m4_case([$3],
+              [],   [opt_[]AS_TR_SH([$2])=yes],
+              [:],  [{ shift; opt_[]AS_TR_SH([$2])="$[]1"; }],
+              [::], [{ shift; opt_[]AS_TR_SH([$2])="${1:-__OPT_EMPTY__}"; }],
+              [[m4_fatal([$0: unrecognized option suffix: $3])]])
+      ;;
+m4_divert_pop([PARSE_ARGS_CASES])dnl
 ])# _PS_GETOPT_OPTS_DEF
-
-
-# ---------------------------------------------------------------------------- #
-
-# _PS_GETOPT_FLAGS
-# ----------------
-# Generate `getopt' command for script to evaluate.
-m4_define([_PS_GETOPT_FLAGS],
-[getopt -n $as_me -l []dnl
-m4_set_map_sep([_PS_GETOPT_LONG_OPTS],
-               [_PS_GET_GETOPT_LONG_FULL(],
-               [)],
-               [,])dnl
- -o []dnl
-m4_set_map_sep([_PS_GETOPT_SHORT_OPTS],
-               [_PS_GET_GETOPT_SHORT_FULL(],
-               [)])dnl
- -- $[]@dnl
-])# _PS_GETOPT_FLAGS
 
 
 # ---------------------------------------------------------------------------- #
@@ -201,18 +237,10 @@ m4_define([_PS_INIT_DEFAULTS],
 [m4_divert_push([DEFAULTS])dnl
 m4_text_box([Predicate Script initialization.])
 
-ps_verbose=false
-ps_help=false
-ps_suppress_false_status=false
+opt_verbose=no
+opt_help=no
+opt_no_false=no
 
-ps_opts='
-ps_verbose
-ps_help
-ps_suppress_false_status'
-
-ps_user_opts='
-m4_ifdef([_PS_USER_OPTS], [m4_defn([_PS_USER_OPTS])
-])'
 m4_divert_pop([DEFAULTS])dnl
 ])# _PS_INIT_DEFAULTS
 
@@ -226,10 +254,10 @@ m4_define([PS_INIT],
 m4_divert_push([KILL])
 
 _PS_INIT_DEFAULTS
-
 _PS_INIT_HELP
+_PS_INIT_ARGS
 
-m4_pattern_forbid([^_?PS_])
+dnl[]m4_pattern_forbid([^_?PS_])
 m4_divert_pop([KILL])dnl
 m4_provide([PS_INIT])dnl
 ])# PS_INIT

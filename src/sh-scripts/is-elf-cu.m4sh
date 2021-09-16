@@ -4,143 +4,25 @@ m4_include([elf.m4])
 m4_include([pred-scripts.m4])
 PS_INIT()dnl
 dnl
-PS_GETOPT_OPTS_DEF([f], [foo], [], [Foo it up])dnl
-#PS_GETOPT_OPTS_DEF([f], [foo], [:])dnl
-#PS_GETOPT_OPTS_DEF([b], [bar], [::])dnl
-#dnl
-##AS_ECHO(["_PS_GETOPT_FLAGS"])
-#AS_ECHO(["_PS_GETOPT_FLAGS"])
-#
-#AS_EXIT([0])
-
-declare -a opt_vars opt_shorts opt_longs opt_helps opt_args;
-
-opt_vars=();
-opt_shorts=();
-opt_longs=();
-opt_helps=();
-opt_args=();
-opt_var_defaults=();
-
-function gen_getopt_cmd() {
-  local getopt_longopt='';
-  local getopt_shortopt='';
-  for i in `seq 0 $(( ${#opt_vars[@]} - 1 ))`; do
-    local var="${opt_vars[[${i}]]}";
-    local short="${opt_shorts[[${i}]]}";
-    local long="${opt_longs[[${i}]]}";
-    local help="${opt_helps[[${i}]]}";
-    local arg="${opt_args[[${i}]]}";
-    local arg_suffix='';
-    case ${arg} in
-      true) arg_suffix=':'; ;;
-      opt) arg_suffix='::'; ;;
-    esac
-
-    getopt_longopt+=",${long}${arg_suffix}";
-    getopt_shortopt+="${short}${arg_suffix}";
-  done
-  AS_ECHO(["getopt -l ${getopt_longopt#,} -o ${getopt_shortopt}"])
-}
-
-function defopt() {
-  opt_vars+=( ${1} );
-  opt_shorts+=( ${2} );
-  opt_longs+=( ${3} );
-  opt_helps+=( "${4}" );
-  local has_arg=false;
-  if test ${#} -lt 5; then
-    opt_args+=( false );
-  elif test "x${5}" = 'xtrue'; then
-    has_arg=true;
-    opt_args+=( true );
-  elif test "x${5}" = 'xopt'; then
-    has_arg=true;
-    opt_args+=( opt );
-  else
-    opt_args+=( false );
-  fi
-  if test ${#} -gt 5; then
-    opt_var_defaults+=( "${6}" );
-  elif test "x${has_arg}" = xfalse; then
-    opt_var_defaults+=( false );
-  else
-    opt_var_defaults+=( '' );
-  fi
-}
-
-function showopts() {
-  for i in `seq 0 $(( ${#opt_vars[@]} - 1 ))`; do
-    local var="${opt_vars[[${i}]]}";
-    local short="${opt_shorts[[${i}]]}";
-    local long="${opt_longs[[${i}]]}";
-    local help="${opt_helps[[${i}]]}";
-    local arg="${opt_args[[${i}]]}";
-
-    AS_ECHO(["Variable  : ${var}"])
-    AS_ECHO(["Short Opt : ${short}"])
-    AS_ECHO(["Long Opt  : ${long}"])
-    AS_ECHO(["Help      : ${help}"])
-    AS_ECHO(["Has Arg   : ${arg}"])
-  done
-}
-
-function showopts_vals() {
-  for i in `seq 0 $(( ${#opt_vars[*]} - 1 ))`
-  do
-  local v="${opt_vars[[${i}]]}";
-  eval "echo ${v}=\${${v}}";
-  done
-}
-
-
-defopt VERBOSE          v verbose  'Be verbose'                      false;
-defopt FALSE_NO_ESTATUS F no-false 'Do not return failure for false' false;
-defopt HELP             h help     'Pring this usage message'        false;
-
-for i in `seq 0 $(( ${#opt_vars[*]} - 1 ))`
-do
-  v="${opt_vars[[${i}]]}";
-  vdefault="${opt_var_defaults[[${i}]]}";
-  eval "export ${v}=${vdefault}";
-done
-
-GETOPTCMD="$( gen_getopt_cmd; ) -n $as_me -- ${@}";
-
-OPTIONS=$( ${GETOPTCMD}; );
+dnl
+PS_GETOPT_OPTS_DEF([v], [verbose],  [], [Be verbose])dnl
+PS_GETOPT_OPTS_DEF([F], [no-false], [], [Do not return failure for false])dnl
+PS_GETOPT_OPTS_DEF([h], [help],     [], [Print this usage message])dnl
+dnl
+dnl
+dnl[]OPTIONS="`_PS_GETOPT_FLAGS`"
 VALID_OPTIONS=${?};
-
+dnl
 AS_VAR_IF([VALID_OPTIONS], [0], [], [AS_EXIT([2])])
 eval set -- "${OPTIONS}";
-
-while :
-do
-  case "${1}" in
-    -h|--help)
-        HELP=true;
-      ;;
-    -v|--verbose)
-        VERBOSE=true;
-      ;;
-    -F|--no-false)
-        FALSE_NO_ESTATUS=true;
-      ;;
-    --)
-      shift;
-      break;
-      ;;
-    *)
-      AS_ERROR([Unexpected option: ${1}], 2)
-      ;;
-  esac
-  shift;
-done
-
+dnl
+dnl PARSE_ARGS SHOULD GO HERE
+dnl
 AS_VAR_COPY([TARGET], [1])
 UTIL_ASSERT_E([$TARGET])
-
+dnl
 AS_IF([ELF_IS_ELF_CU([$TARGET])],
       [AS_VAR_SET([IS_BIN], [true])],
       [AS_VAR_SET([IS_BIN], [false])])
-
+dnl
 UTIL_REPORT_PRED([IS_BIN])
