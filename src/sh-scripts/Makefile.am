@@ -3,9 +3,10 @@ bin_SCRIPTS =  cuts depgraph displays joinlines lorder wsmerge
 bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames
 
 # M4SH generated scripts
-M4SH_TARGETS =  needs rpath soname
+IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin
+M4SH_TARGETS =  needs rpath soname $(IS_ELF_TARGETS)
 bin_SCRIPTS  += $(M4SH_TARGETS)
-CLEANFILES   =  $(M4SH_TARGETS) is-elf-cu
+CLEANFILES   =  $(M4SH_TARGETS)
 
 SUBDIRS = test
 
@@ -13,19 +14,31 @@ M4SUGAR_DIR = $(top_srcdir)/src/m4sugar
 
 AUTOM4TE_FLAGS = -I$(M4SUGAR_DIR) -l m4sh
 
-rpath is-elf-cu: %: %.m4sh
+rpath: %: %.m4sh
 	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $<
 
 soname.in:
 	echo 'm4_define([DT_ENTRY], [SONAME])' > $@
 needs.in:
 	echo 'm4_define([DT_ENTRY], [NEEDED])' > $@
+is-elf-cu.in:
+	echo 'm4_define([IS_ELF_XX], [IS_ELF_CU])' > $@
+is-elf-so.in:
+	echo 'm4_define([IS_ELF_XX], [IS_ELF_SO])' > $@
+is-elf-ex.in:
+	echo 'm4_define([IS_ELF_XX], [IS_ELF_EX])' > $@
+is-elf-bin.in:
+	echo 'm4_define([IS_ELF_XX], [IS_ELF_BIN])' > $@
 
-BUILT_SOURCES = soname.in needs.in
+BUILT_SOURCES =  soname.in needs.in
+BUILT_SOURCES += is-elf-cu.in is-elf-so.in is-elf-ex.in is-elf-bin.in
 CLEANFILES += $(BUILT_SOURCES)
 
 needs soname: %: dt_entry.m4sh %.in
 	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $*.in $<
 
+$(IS_ELF_TARGETS): %: is-elf-xx.m4sh %.in
+	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $*.in $<
+
 $(M4SH_TARGETS): $(addprefix $(M4SUGAR_DIR)/,elf.m4 util.m4)
-is-elf-cu: $(M4SUGAR_DIR)/pred-scripts.m4
+$(IS_ELF_TARGETS): $(M4SUGAR_DIR)/pred-scripts.m4

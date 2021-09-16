@@ -1,6 +1,10 @@
 is-elf-cu
+is-elf-so
+is-elf-bin
+is-elf-ex
 needs
 rpath
 soname
 needs.in
 soname.in
+*.in
