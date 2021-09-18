@@ -21,11 +21,6 @@ m4_define([_m4_divert(PARSE_GETOPT_CASES)], 30)
 m4_define([_m4_divert(PARSE_GETOPT_END)],   31)
 m4_define([_m4_divert(PARSE_EXTRA)],        32)
 
-#m4_define([_m4_divert(VERSION_BEGIN)],  200)
-#m4_define([_m4_divert(VERSION_FSF)],    201)
-#m4_define([_m4_divert(VERSION_USER)],   202)
-#m4_define([_m4_divert(VERSION_END)],    203)
-
 
 # ---------------------------------------------------------------------------- #
 
@@ -36,9 +31,12 @@ m4_define([_PS_INIT_HELP],
 
 function usage() {
   echo "\
-USAGE: $as_me [OPTIONS...] FILE
-
 m4_divert_pop([HELP_BEGIN])dnl
+m4_divert_push([HELP_USAGE_LN])dnl
+USAGE: $as_me [[OPTIONS...]] FILE
+m4_divert_pop([HELP_USAGE_LN])dnl
+m4_divert_push([HELP_SUMMARY])
+m4_divert_pop([HELP_SUMMARY])dnl
 m4_divert_push([HELP_END])dnl
 dnl Close MESSAGE string.
 "
@@ -183,10 +181,12 @@ _PS_INIT_DEFAULTS
 _PS_INIT_HELP
 _PS_INIT_GETOPT
 _PS_INIT_PARSE_GETOPT
-
+m4_divert_text([HELP_OPTS], [])
 PS_GETOPT_OPTS_DEF([v], [verbose],  [], [Be verbose])dnl
 PS_GETOPT_OPTS_DEF([F], [no-false], [], [Do not return failure for false])dnl
-PS_HELP_OPTS_DEF([h], [help], [Print this usage message])dnl
+m4_divert_push([HELP_OPTS])dnl
+PS_HELP_OPTS_DEF([h], [help], [], [Print this usage message])dnl
+m4_divert_pop([HELP_OPTS])dnl
 
 m4_pattern_forbid([^_?PS_])
 m4_divert_pop([KILL])dnl
