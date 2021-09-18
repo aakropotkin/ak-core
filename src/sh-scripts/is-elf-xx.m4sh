@@ -7,9 +7,6 @@ AS_VAR_IF([opt_help], [yes], [usage 0])
 AS_VAR_COPY([TARGET], [1])
 shift
 UTIL_ASSERT_E([$TARGET])
-AS_IF([ELF_IS_ELF_XX([$TARGET])],
-      [AS_VAR_SET([IS_BIN], [yes])],
-      [AS_VAR_SET([IS_BIN], [no])])
-PS_REPORT_BOOL([IS_BIN])
+AS_IF([@XX@([$TARGET])], [PS_REPORT_BOOL([yes])], [PS_REPORT_BOOL([no])])
 dnl # ======================================================================== #
 dnl vim: set filetype=config :

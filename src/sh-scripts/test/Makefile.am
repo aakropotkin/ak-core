@@ -22,12 +22,12 @@ libgreet_paths: libgreet.la
 	@test -e $(libgreet_a_PATH) && echo 'found' || echo 'not found'
 
 
-check_SCRIPTS = test-is-elf-cu.sh test-cdeps.sh
+check_SCRIPTS = ../is-elf-cu ../cdeps
+check_SCRIPTS += test-is-elf-cu.sh test-cdeps.sh
 TESTS = test-is-elf-cu.sh test-cdeps.sh
 
-# FIXME: This is only here temporarily until M4SH version of this script
-# replaces the existing Zsh script.
-check_SCRIPTS += ../is-elf-cu
+../is-elf-cu:
+	$(MAKE) -C $(builddir)/.. is-elf-cu
 
-test-is-elf-cu.sh: | ../is-elf-cu hello.o howdy.o greet.o
-test-cdeps.sh: | ../cdeps cdeps-a.h cdeps-b.h cdeps-c.h cdeps-a.c cdeps-c.c
+check_DATA =  hello.o howdy.o greet.o
+check_DATA += cdeps-a.h cdeps-b.h cdeps-c.h cdeps-a.c cdeps-c.c

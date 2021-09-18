@@ -195,13 +195,13 @@ m4_provide([PS_INIT])dnl
 # ---------------------------------------------------------------------------- #
 
 m4_define([PS_REPORT_BOOL],
-[AS_VAR_COPY([_ps_RESULT], [$1])
-AS_VAR_IF([opt_no_false], [yes],
-          [_ps_fail_status=0
-           opt_verbose=yes],
-          [_ps_fail_status=1])
-AS_VAR_IF([opt_verbose], [yes], [AS_ECHO([$_ps_RESULT])])
-AS_VAR_IF([_ps_RESULT], [yes], [AS_EXIT([0])], [AS_EXIT([$_ps_fail_status])])
+[AS_VAR_IF([opt_no_false], [yes],
+           [_ps_fail_status=0
+            opt_verbose=yes],
+           [_ps_fail_status=1])
+AS_VAR_IF([opt_verbose], [yes],
+          [AS_CASE([$1], [yes], [AS_ECHO([true])], [AS_ECHO([false])])])
+AS_CASE([$1], [yes], [AS_EXIT([0])], [AS_EXIT([$_ps_fail_status])])
 ])
 
 

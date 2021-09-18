@@ -21,24 +21,18 @@ soname.in:
 	echo 'm4_define([DT_ENTRY], [SONAME])' > $@
 needs.in:
 	echo 'm4_define([DT_ENTRY], [NEEDED])' > $@
-is-elf-cu.in:
-	echo 'm4_define([IS_ELF_XX], [IS_ELF_CU])' > $@
-is-elf-so.in:
-	echo 'm4_define([IS_ELF_XX], [IS_ELF_SO])' > $@
-is-elf-ex.in:
-	echo 'm4_define([IS_ELF_XX], [IS_ELF_EX])' > $@
-is-elf-bin.in:
-	echo 'm4_define([IS_ELF_XX], [IS_ELF_BIN])' > $@
 
 BUILT_SOURCES =  soname.in needs.in
-BUILT_SOURCES += is-elf-cu.in is-elf-so.in is-elf-ex.in is-elf-bin.in
 CLEANFILES += $(BUILT_SOURCES)
 
 needs soname: %: dt_entry.m4sh %.in
 	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $*.in $<
 
-$(IS_ELF_TARGETS): %: is-elf-xx.m4sh %.in
-	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $*.in $<
+$(IS_ELF_TARGETS): %: is-elf-xx.m4sh
+	sed "s/@XX@/ELF_$$(basename $@|tr '[a-z]-' '[A-Z]_')/"  \
+	  $(srcdir)/is-elf-xx.m4sh > $*.m4sh;                        \
+	$(AUTOM4TE) $(AUTOM4TE_FLAGS) -o $@ $*.m4sh;                 \
+	rm $*.m4sh
 
 $(M4SH_TARGETS): $(addprefix $(M4SUGAR_DIR)/,elf.m4 util.m4)
 $(IS_ELF_TARGETS): $(M4SUGAR_DIR)/pred-scripts.m4
