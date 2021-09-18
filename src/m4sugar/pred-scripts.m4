@@ -6,20 +6,20 @@
 
 m4_define([_m4_divert(DEFAULTS)], 10)
 
-m4_define([_m4_divert(GETOPT_BEGIN)],       15)
-m4_define([_m4_divert(GETOPT_LONG_OPTS)],   16)
-m4_define([_m4_divert(GETOPT_SHORT_OPTS)],  17)
-m4_define([_m4_divert(GETOPT_END)],         18)
-m4_define([_m4_divert(PARSE_GETOPT_BEGIN)], 21)
-m4_define([_m4_divert(PARSE_GETOPT_CASES)], 22)
-m4_define([_m4_divert(PARSE_GETOPT_END)],   23)
-m4_define([_m4_divert(PARSE_EXTRA)],        24)
+m4_define([_m4_divert(HELP_BEGIN)],     15)
+m4_define([_m4_divert(HELP_USAGE_LN)],  16)
+m4_define([_m4_divert(HELP_SUMMARY)],   17)
+m4_define([_m4_divert(HELP_OPTS)],      18)
+m4_define([_m4_divert(HELP_END)],       19)
 
-m4_define([_m4_divert(HELP_BEGIN)],     100)
-m4_define([_m4_divert(HELP_USAGE_LN)],  101)
-m4_define([_m4_divert(HELP_SUMMARY)],   102)
-m4_define([_m4_divert(HELP_OPTS)],      103)
-m4_define([_m4_divert(HELP_END)],       106)
+m4_define([_m4_divert(GETOPT_BEGIN)],       25)
+m4_define([_m4_divert(GETOPT_LONG_OPTS)],   26)
+m4_define([_m4_divert(GETOPT_SHORT_OPTS)],  27)
+m4_define([_m4_divert(GETOPT_END)],         28)
+m4_define([_m4_divert(PARSE_GETOPT_BEGIN)], 29)
+m4_define([_m4_divert(PARSE_GETOPT_CASES)], 30)
+m4_define([_m4_divert(PARSE_GETOPT_END)],   31)
+m4_define([_m4_divert(PARSE_EXTRA)],        32)
 
 #m4_define([_m4_divert(VERSION_BEGIN)],  200)
 #m4_define([_m4_divert(VERSION_FSF)],    201)
@@ -36,7 +36,7 @@ m4_define([_PS_INIT_HELP],
 
 function usage() {
   echo "\
-USAGE: $as_me
+USAGE: $as_me [OPTIONS...] FILE
 
 m4_divert_pop([HELP_BEGIN])dnl
 m4_divert_push([HELP_END])dnl
@@ -58,10 +58,10 @@ m4_define([_PS_INIT_GETOPT],
 _ps_getopt_OPTIONS="`getopt -n $as_me []dnl
 m4_divert_pop([GETOPT_BEGIN])dnl
 m4_divert_push([GETOPT_LONG_OPTS])dnl
--l []dnl
+-l help[]dnl
 m4_divert_pop([GETOPT_LONG_OPTS])dnl
 m4_divert_push([GETOPT_SHORT_OPTS])dnl
- -o []dnl
+ -o h[]dnl
 m4_divert_pop([GETOPT_SHORT_OPTS])dnl
 m4_divert_push([GETOPT_END])dnl
  -- $[]@`"
@@ -87,6 +87,9 @@ m4_divert_push([PARSE_GETOPT_END])dnl
     --)
       shift
       break
+      ;;
+    -h|--help)
+      usage 0;
       ;;
     *)
       AS_ERROR([Unexpected option: ${1}], 2)
@@ -145,7 +148,7 @@ m4_divert_push([PARSE_GETOPT_CASES])dnl
       ;;
 m4_divert_pop([PARSE_GETOPT_CASES])dnl
 m4_divert_push([GETOPT_LONG_OPTS])dnl
-$2[]$3,[]dnl
+,$2[]$3[]dnl
 m4_divert_pop([GETOPT_LONG_OPTS])dnl
 m4_divert_push([GETOPT_SHORT_OPTS])dnl
 $1[]$3[]dnl
@@ -162,7 +165,6 @@ m4_define([_PS_INIT_DEFAULTS],
 m4_text_box([Predicate Script initialization.])
 
 opt_verbose=no
-opt_help=no
 opt_no_false=no
 
 m4_divert_pop([DEFAULTS])dnl
@@ -184,7 +186,7 @@ _PS_INIT_PARSE_GETOPT
 
 PS_GETOPT_OPTS_DEF([v], [verbose],  [], [Be verbose])dnl
 PS_GETOPT_OPTS_DEF([F], [no-false], [], [Do not return failure for false])dnl
-PS_GETOPT_OPTS_DEF([h], [help],     [], [Print this usage message])dnl
+PS_HELP_OPTS_DEF([h], [help], [Print this usage message])dnl
 
 m4_pattern_forbid([^_?PS_])
 m4_divert_pop([KILL])dnl
