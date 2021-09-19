@@ -15,8 +15,6 @@ function _dedup() {
   cat -|awk '!x[$0]++';
 }
 
-
-
 M4INCDIRS=();
 
 for p in $( echo "${ACLOCAL_PATH}"|tr ':' ' '; ); do
@@ -45,5 +43,5 @@ if _has_prog aclocal; then
   fi
 fi
 
-echo "${M4INCDIRS[*]}"|tr ' ' '\n'|xargs -i realpath -s {}|_dedup  \
-  |tr '\n' ':'|sed 's/:$//';
+find $( echo "${M4INCDIRS[*]}"|tr ' ' '\n'|xargs -i realpath -s {} |_dedup; )  \
+     -name '*.m4*';
