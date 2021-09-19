@@ -1,0 +1,48 @@
+#! /usr/bin/env sh
+
+function _has_prog() {
+  command which --tty-only ${1} 2>&1 1>/dev/null;
+}
+
+function _which_bin_dir() {
+  prog_path="$( command which --tty-only ${1}; )";
+  if test ${?} = 0; then
+    dirname $( readlink -f ${prog_path}; );
+  fi
+}
+
+function _dedup() {
+  cat -|awk '!x[$0]++';
+}
+
+
+
+M4INCDIRS=();
+
+for p in $( echo "${ACLOCAL_PATH}"|tr ':' ' '; ); do
+  if test -d ${p}; then
+    M4INCDIRS+=( "${p}" );
+  fi
+done
+
+
+if ! test ${AC_MACRODIR+y} && _has_prog autom4te; then
+  ac_macro_dir="$( _which_bin_dir autom4te; )/../share/autoconf";
+  if test -d ${ac_macro_dir}; then
+    AC_MACRODIR="$( realpath -s ${ac_macro_dir}; )";
+  fi
+fi
+
+if test ${AC_MACRODIR+y}; then
+  M4INCDIRS+=( $(find ${AC_MACRODIR} -name '*.m4*'|xargs dirname|sort|uniq; ) );
+fi
+
+
+if _has_prog aclocal; then
+  aclocal_dir="$( aclocal --print-ac-dir; )";
+  if test -d ${aclocal_dir}; then
+    M4INCDIRS+=( "${aclocal_dir}" );
+  fi
+fi
+
+echo "${M4INCDIRS[*]}"|tr ' ' '\n'|_dedup|tr '\n' ':'|sed 's/:$//';
