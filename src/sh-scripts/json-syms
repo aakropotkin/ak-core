@@ -1,0 +1,47 @@
+#! /usr/bin/env sh
+
+
+if test ${#} -lt 1; then
+  echo "You must provide the name of an ELF file" >&2;
+  exit 1;
+fi
+
+TARGET=${1};
+shift;
+
+function _is_so() {
+  file -Lb ${1}|grep -q 'ELF \(32\|64\)-bit LSB shared object, ';
+}
+
+function _run_nm() {
+  if _is_so ${1}; then
+    nm -gD ${1};
+  else
+    nm -g ${1};
+  fi
+}
+
+
+function _syms_json() {
+  cat -|awk '
+    BEGIN { IFS=" "; first = 1; print "  \"symbols\": ["; }
+    {
+      if ( first ) { first = 0; printf "   "; } else { printf ","; } 
+      len=match($2, /([^@]+)@*([^@]*)/, symver);
+      print " {"
+      print "      \"symbol\": \"" symver[1] "\","
+      print "      \"kind\": \"" $1 "\","
+      printf "      \"version\": ";
+      if ( symver[2] != "" ) {
+        print "\"" symver[2] "\""
+      } else {
+        print "null"
+      }
+      printf "    }"
+    }
+    END { print "\n  ]\n}"; }
+  ';
+}
+
+echo -e "{\n  \"file\": \"${TARGET}\",";
+_run_nm ${TARGET}|sed 's:^.\{17\}::'|_syms_json;

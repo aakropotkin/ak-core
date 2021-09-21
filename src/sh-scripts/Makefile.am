@@ -1,5 +1,5 @@
 
-bin_SCRIPTS =  cuts depgraph displays joinlines lorder wsmerge
+bin_SCRIPTS =  cuts depgraph displays joinlines lorder wsmerge json-syms
 bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames get-m4-path get-m4-files
 
 # M4SH generated scripts
