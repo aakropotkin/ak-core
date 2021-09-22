@@ -1,12 +1,27 @@
 # -*- mode: autoconf; -*-
 # ============================================================================ #
+#
+#
+# ---------------------------------------------------------------------------- #
+
 m4_include([elf.m4])
-m4_include([pred-scripts.m4])
-PS_INIT()dnl
-m4_divert_text([HELP_SUMMARY], [@SUMMARY@])
-AS_VAR_COPY([TARGET], [1])
-shift
-UTIL_ASSERT_E([$TARGET])
-AS_IF([@XX@([$TARGET])], [PS_REPORT_BOOL([yes])], [PS_REPORT_BOOL([no])])
+
+# ---------------------------------------------------------------------------- #
+
+AS_INIT
+
+# Create is-elf-cu
+AS_INIT_GENERATED([is-elf-cu], [[
+]]) || { AS_ECHO(["Failed to create is-elf-cu.sh"]); AS_EXIT; }
+m4_pushdef([AS_MESSAGE_LOG_FD])dnl
+cat >> "is-elf-cu" <<\__EOF__
+m4_popdef([AS_MESSAGE_LOG_FD])dnl
+IS_ELF_INIT([ELF_IS_ELF_CU], [Detect if file is an ELF compilation unit.])
+__EOF__
+
+
+dnl # ------------------------------------------------------------------------ #
+
+
 dnl # ======================================================================== #
 dnl vim: set filetype=config :

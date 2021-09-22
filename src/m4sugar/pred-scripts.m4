@@ -173,8 +173,8 @@ m4_divert_pop([DEFAULTS])dnl
 
 # PS_INIT
 # -------
-m4_define([PS_INIT],
-[AS_INIT[]dnl
+m4_defun([PS_INIT],
+[m4_require([AS_INIT])dnl
 m4_divert_push([KILL])
 
 _PS_INIT_DEFAULTS
