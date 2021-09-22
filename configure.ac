@@ -27,6 +27,9 @@ AC_PROG_GREP
 AC_PROG_SED
 AC_PROG_AUTOM4TE
 
+AK_PROG_READELF
+AS_ECHO(["$READELF"])
+
 AC_SUBST([lt_obj_subdir], ["$lt_cv_objdir"])
 
 AC_CONFIG_FILES([Makefile
