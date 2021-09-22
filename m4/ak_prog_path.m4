@@ -1,13 +1,18 @@
 # -*- mode: autoconf; -*-
 # ============================================================================ #
-#
-#
+
+
 # ---------------------------------------------------------------------------- #
 
 #serial 1
 
-# AK_PROG_READELF
-AC_DEFUN([AK_PROG_READELF], [AK_PROG_PATH([READELF], [readelf])])
+# AK_PROG_PATH(VARIABLE, PROGRAM, [VALUE-IF-NOT-SET], [PATH = $PATH])
+# -------------------------------------------------------------------
+AC_DEFUN([AK_PROG_PATH],
+[AC_PREREQ([2.61])
+AC_ARG_VAR([$1], [Absolute path to $2 executable])
+AC_PATH_PROG([$1], [$2], [$3], [$4])
+])# AK_PROG_PATH
 
 
 # ---------------------------------------------------------------------------- #
