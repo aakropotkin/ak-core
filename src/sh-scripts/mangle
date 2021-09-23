@@ -73,7 +73,7 @@ if test "x`wc -l ${SYMS2}|cut -d' ' -f1`" = x0; then
   exit 1;
 fi
 
-set +e;
+set -e;
 mv ${SYMS2} ${SYMS};
 
 
