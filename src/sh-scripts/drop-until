@@ -1,0 +1,89 @@
+#! /usr/bin/env sh
+
+as_me=drop-until;
+
+function usage() {
+  MESSAGE="\
+Usage: $as_me [OPTION...] [FILE]
+Print lines beginning at matching line. Regular expressions use \`sed' syntax.
+
+With no FILE, or when FILE is -, read standing input.
+Output is sent to STDOUT unless \`--in-place' ( \`-i' ) flag is given.
+
+  -r, --regexp-extended    use extended regular expressions in the script
+  -i, --in-place           edit file in place.
+  -e, --exclude            do not include matching line in output
+  -h, --help               print this usage message
+";
+  if test "x${1:-1}" = x0; then
+    echo "${MESSAGE}";
+  else
+    echo "${MESSAGE}" >&2;
+  fi
+  exit ${1:-1};
+}
+
+
+GETOPT_CMD="getopt -n $as_me -o heir -l help,exclude,in-place";
+GETOPT_CMD+=",regexp-extended -- ${@}";
+OPTIONS="`${GETOPT_CMD}`";
+OPTIONS_RSL=${?};
+if test "x${OPTIONS_RSL}" != x0; then
+  echo "getopt failed to parse: error code ${OPTIONS_RSL}" >&2;
+  exit ${OPTIONS_RSL};
+fi
+eval set -- "${OPTIONS}";
+
+EXCLUDE=no;
+INPLACE=no;
+
+SEDCMD="sed";
+
+while :
+do
+  case "${1}" in
+    -h|--help)
+        usage 0;
+        ;;
+    -r|--regexp-extended)
+        SEDCMD+=" -r";
+        ;;
+    -e|--exclude)
+        EXCLUDE=yes;
+        ;;
+    -i|--in-place)
+        SEDCMD+=" -i";
+        INPLACE=yes;
+        ;;
+    --)
+        shift;
+        break;
+        ;;
+    *)
+        echo "Unexpected option: ${1}" >&2;
+        usage;
+        ;;
+  esac
+  shift;
+done
+
+if test ${#} -lt 1; then
+  echo "You must provide a pattern to match with" >&2;
+  usage;
+fi
+
+PATTERN="${1}";
+shift;
+
+if test "x${INPLACE}" = "xyes" && test ${#} -lt 1; then
+  echo "You must provide a file name when using \`--in-place' option" >&2;
+  exit 1;
+fi
+
+# You must use a `\' before using wonky delimiters like this.
+SEP=$'\x06';
+if test "x${EXCLUDE}" = xyes; then
+  eval "${SEDCMD} '\\${SEP}${PATTERN}${SEP},\$!d'";
+else
+  eval "${SEDCMD} '1,\\${SEP}${PATTERN}${SEP}d';";
+fi
