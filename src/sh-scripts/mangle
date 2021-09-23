@@ -2,9 +2,43 @@
 set -e;
 as_me=mangle;
 SYMS=$( mktemp -t ${as_me}-XXXXXX; );
+SYMS2=$( mktemp -t ${as_me}-XXXXXX; );
 CFILE=$( mktemp -t ${as_me}-XXXXXX.cpp; );
 OFILE=$( mktemp -t ${as_me}-XXXXXX.o; );
-trap "rm -f ${SYMS} ${CFILE} ${OFILE}; exit 1;" 1 2 3 13 15;
+trap "rm -f ${SYMS} ${SYMS2} ${CFILE} ${OFILE}; exit 1;" 1 2 3 13 15;
+
+OPTIONS="`getopt -n $as_me -o dk -- ${@}`";
+OPTIONS_RSL=${?}
+if test "x${OPTIONS_RSL}" != x0; then
+  echo "getopt failed to parse: error code ${OPTIONS_RSL}" >&2;
+  exit ${OPTIONS_RSL};
+fi
+
+eval "set -- ${OPTIONS}";
+
+DEBUG=no;
+KEEPGOING=no;
+
+while :
+do
+  case "${1}" in
+    -k)
+      KEEPGOING=yes;
+      ;;
+    -d)
+      DEBUG=yes;
+      ;;
+    --)
+      shift;
+      break;
+      ;;
+    *)
+      echo "Unexpected argument: ${1}" >&2;
+      exit 1;
+      ;;
+  esac
+  shift;
+done
 
 if test ${#} -lt 1; then
   cat - > ${SYMS};
@@ -12,15 +46,52 @@ else
   echo "${@}" > ${SYMS};
 fi
 
-cat ${SYMS}|sed 's/$/;/' > ${CFILE};
+SKIPS=( operator vtable transaction guard non-virtual virtual typeinfo VTT );
+
+if test "x${DEBUG}" = xyes; then
+  echo "SKIPS: ${SKIPS[*]}";
+  echo '';
+fi
+
+if test "x${KEEPGOING}" != xyes; then
+  if egrep -q "^(`echo ${SKIPS[*]}|tr ' ' '|'`)" ${SYMS}; then
+    echo "This script does not handle the following symbol types:" >&2;
+    echo "${SKIPS[*]}" >&2;
+    exit 1;
+  fi
+fi
+
+set +e;
+egrep -v "^(`echo ${SKIPS[*]}|tr ' ' '|'`)" ${SYMS} > ${SYMS2};
+
+if test "x`wc -l ${SYMS2}|cut -d' ' -f1`" = x0; then
+  echo "None of the given symbols could be processed" >&2;
+  exit 1;
+fi
+
+set +e;
+mv ${SYMS2} ${SYMS};
+
+
+cat ${SYMS}|sed -e 's/$/;/' > ${CFILE};
+
 echo -e 'int main( void ) {\n  void * __MANGLER = nullptr;' >> ${CFILE};
 
 cat ${SYMS}                                                                    \
-  |sed 's/^.* \([a-zA-Z_][a-zA-Z_:<>~0-9]\+\)(.*$/  __MANGLER = (void *) \1;/' \
+  |sed 's/^.* \([a-zA-Z_][][a-zA-Z_:<>~0-9]\+\)(.*$/  __MANGLER = (void *) \& \1;/' \
        >> ${CFILE};
 
 echo -e '  return 0;\n}' >> ${CFILE};
+
+if test "x${DEBUG}" = xyes; then
+  echo -e "Symbols File:";
+  cat ${SYMS};
+  echo -e "__EOF__\n\nC++ File:";
+  cat ${CFILE};
+  echo "__EOF__";
+fi
+
 g++ -c ${CFILE} -o ${OFILE};
 
 nm -uP ${OFILE}|cut -d' ' -f1;
-rm -f ${SYMS} ${CFILE} ${OFILE};
+rm -f ${SYMS} ${SYMS2} ${CFILE} ${OFILE};
