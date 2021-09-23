@@ -11,6 +11,7 @@ OPTIONS="`getopt -n $as_me -o dk -- ${@}`";
 OPTIONS_RSL=${?}
 if test "x${OPTIONS_RSL}" != x0; then
   echo "getopt failed to parse: error code ${OPTIONS_RSL}" >&2;
+  rm -f ${SYMS} ${SYMS2} ${CFILE} ${OFILE};
   exit ${OPTIONS_RSL};
 fi
 
@@ -34,6 +35,7 @@ do
       ;;
     *)
       echo "Unexpected argument: ${1}" >&2;
+      rm -f ${SYMS} ${SYMS2} ${CFILE} ${OFILE};
       exit 1;
       ;;
   esac
@@ -57,6 +59,7 @@ if test "x${KEEPGOING}" != xyes; then
   if egrep -q "^(`echo ${SKIPS[*]}|tr ' ' '|'`)" ${SYMS}; then
     echo "This script does not handle the following symbol types:" >&2;
     echo "${SKIPS[*]}" >&2;
+    rm -f ${SYMS} ${SYMS2} ${CFILE} ${OFILE};
     exit 1;
   fi
 fi
@@ -66,6 +69,7 @@ egrep -v "^(`echo ${SKIPS[*]}|tr ' ' '|'`)" ${SYMS} > ${SYMS2};
 
 if test "x`wc -l ${SYMS2}|cut -d' ' -f1`" = x0; then
   echo "None of the given symbols could be processed" >&2;
+  rm -f ${SYMS} ${SYMS2} ${CFILE} ${OFILE};
   exit 1;
 fi
 
