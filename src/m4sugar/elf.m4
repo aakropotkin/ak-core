@@ -25,6 +25,8 @@ m4_define([ELF_IS_ELF_BIN], [_ELF_IS_ELF_FILE([$1], [_ELF_BIN_MATCH])])
 m4_define([ELF_IS_ELF_CU], [_ELF_IS_ELF_FILE([$1], [_ELF_CU_MATCH])])
 m4_define([ELF_IS_ELF_SO], [_ELF_IS_ELF_FILE([$1], [_ELF_SO_MATCH])])
 
+# For `.a' archives we can't immediately tell if the archive contains ELF
+# objects using `file -Lb', so we rerun checking for magic.
 m4_define([ELF_IS_ELF_AR],
 [{ _ELF_IS_ELF_FILE([$1], [_ELF_AR_MATCH]); } && []dnl
 { file -Lm $1 2>&1|grep -q ELF; }[]dnl
