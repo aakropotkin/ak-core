@@ -4,7 +4,7 @@ bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames get-m4-path get-m4-files
 bin_SCRIPTS += drop-until
 
 # M4SH generated scripts
-IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin
+IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
 M4SH_TARGETS =  needs rpath soname $(IS_ELF_TARGETS)
 bin_SCRIPTS  += $(M4SH_TARGETS)
 CLEANFILES   =  $(M4SH_TARGETS)
@@ -34,6 +34,7 @@ $(IS_ELF_TARGETS): %: is-elf-xx.m4sh
 	if expr "$@" : '.*-cu*.' >/dev/null; then ELF_KIND='compilation unit';  \
 	elif expr "$@" : '.*-so.*' >/dev/null; then ELF_KIND='shared object';   \
 	elif expr "$@" : '.*-ex.*' >/dev/null; then ELF_KIND='executable';      \
+	elif expr "$@" : '.*-ar.*' >/dev/null; then ELF_KIND='archive';         \
 	elif expr "$@" : '.*-bin.*' >/dev/null; then ELF_KIND='binary'; fi;     \
 	sed -e "s/@XX@/ELF_$$(basename $@|tr '[a-z]-' '[A-Z]_')/"               \
 	    -e "s/@SUMMARY@/Detect if file is an ELF $$ELF_KIND./"              \

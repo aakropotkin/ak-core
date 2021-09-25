@@ -8,3 +8,4 @@ soname
 needs.in
 soname.in
 *.in
+is-elf-ar
