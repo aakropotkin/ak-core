@@ -29,6 +29,11 @@ AC_PROG_AUTOM4TE
 
 AC_SUBST([lt_obj_subdir], ["$lt_cv_objdir"])
 
+
+AK_CHECK_LIB([elf], [gelf_getsym])
+
+
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile
                  src/m4sugar/Makefile
