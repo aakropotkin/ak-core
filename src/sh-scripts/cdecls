@@ -1,22 +1,21 @@
 #! /usr/bin/env sh
-# -*- mode: sh-shell; -*-
+# -*- mode: sh-shell; sh-shell: sh; -*-
 # ============================================================================ #
-
-
+#
+#
 # ---------------------------------------------------------------------------- #
 
-SNAME=cdeps;
+as_me=cdecls;
 
 
 # ---------------------------------------------------------------------------- #
 
 function usage() {
   USAGE_MESSAGE="\
-Usage: ${SNAME} [OPTION...] FILE [-- CFLAGS]
-Print header dependencies for C/C++ file.
+Usage: ${as_me} [OPTION...] FILE [-- CFLAGS]
+Print declarations for C/C++ file.
 
 Options:
-  -s, --system   Include system headers in output. Equivelant to \`gcc -MM'.
   -C, --cxx      Process as C++ file.
   -D, --defines  Scape \`#ifdef' symbols and set all to 1.
   -h, --help     Print this help message.
@@ -42,7 +41,6 @@ back to \`gcc' and \`g++' respectively.";
 
 # Option settings
 TARGET='';
-SYSDEPS=no;
 DO_CXX=no;
 DEFINES=no;
 
@@ -50,12 +48,12 @@ DEFINES=no;
 # ---------------------------------------------------------------------------- #
 
 # Split options
-LONG_OPTS='-l help -l system -l cxx -l defines'
-OPTIONS="$( getopt -n ${SNAME} ${LONG_OPTS} -o 'shCD' -- ${@}; )";
+LONG_OPTS='-l help -l cxx -l defines'
+OPTIONS="$( getopt -n ${as_me} ${LONG_OPTS} -o 'hCD' -- ${@}; )";
 VALID_OPTIONS=${?};
 
 if test ${VALID_OPTIONS} != 0; then
-  echo "${SNAME}: encountered invalid options" >&2;
+  echo "${as_me}: encountered invalid options" >&2;
   usage 2;
 fi
 
@@ -67,9 +65,6 @@ do
   case ${1} in
     -h|--help)
       usage 0;
-      ;;
-    -s|--system)
-      SYSDEPS=yes;
       ;;
     -C|--cxx)
       DO_CXX=yes;
@@ -85,7 +80,7 @@ do
       if test -z ${TARGET}; then
         TARGET="${1}";
       else
-        echo "${SNAME}: unexpected option: ${1}" >&2;
+        echo "${as_me}: unexpected option: ${1}" >&2;
         usage 2;
       fi
       ;;
@@ -101,22 +96,12 @@ if test -z "${TARGET}"; then
   shift;
 fi
 
-# Strip off leading `./' or any other wonky pathname stuff that `CC -M' drops.
-TARGET="$( realpath --relative-to ${PWD} ${TARGET}; )";
+TARGET="$( readlink -f ${TARGET}; )";
 
 
 # Remaining args are considered compiler flags
 if test ${#} -gt 0; then
   CFLAGS="${@}";
-fi
-
-
-# ---------------------------------------------------------------------------- #
-
-if test "x${SYSDEPS}" = "xyes"; then
-  CFLAGS+=" -M";
-else
-  CFLAGS+=" -MM";
 fi
 
 
@@ -137,27 +122,6 @@ function _getifnames() {
 }
 
 
-function _joinlines() {
-  cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
-}
-
-function _wslines() {
-  cat ${1:--}|tr -s $'\t' ' '|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
-}
-
-function _getdeps() {
-  # Remove the target file and fake target.
-  # Suppress debug output from CPP.
-  ${CC} -MT '' ${TARGET} ${CFLAGS}|sed -e 's/^: //';
-}
-
-function _getdeps_post() {
-  _getdeps|_joinlines|_wslines|grep -v "^${TARGET#\.#\\\.}\$";
-}
-
-
-# ---------------------------------------------------------------------------- #
-
 # Scrape `#ifdef' symbols and set all of them to 1 using `-D<NAME>'.
 # This is far from exhaustive considering that combinations of these symbols
 # might be incompatible; but this covers a large number of use cases.
@@ -172,7 +136,34 @@ fi
 
 # ---------------------------------------------------------------------------- #
 
-_getdeps_post;
+# Make a temporary directory, and cd to it.
+# Running the ADA spec generator often creates more files than the one targeted,
+# so it's easier just to wipe out the directory.
+TD=$( mktemp -dt ${as_me}-XXXXXX; );
+trap "cd - 2>&1 1>/dev/null; rm -rf ${TD}; exit 1;" 1 2 3 13 15;
+cd ${TD};
+
+
+# ---------------------------------------------------------------------------- #
+
+cat ${TARGET} > spec.c;
+${CC} -c -fdump-ada-spec spec.c;
+
+if ! test -r spec_c.ads; then
+  echo "Failed to produce ADA Spec File" >&2;
+  cd - 2>&1 1>/dev/null;
+  rm -rf ${TD};
+  exit 1;
+fi
+
+cat spec_c.ads|grep 'External_Name'|cut -d'"' -f2;
+
+
+# ---------------------------------------------------------------------------- #
+
+# Cleanup
+cd - 2>&1 1>/dev/null;
+rm -rf ${TD};
 
 
 # ---------------------------------------------------------------------------- #

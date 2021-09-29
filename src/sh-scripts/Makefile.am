@@ -1,7 +1,7 @@
 
 bin_SCRIPTS =  cuts depgraph displays joinlines lorder wsmerge json-syms
 bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames get-m4-path get-m4-files
-bin_SCRIPTS += drop-until
+bin_SCRIPTS += drop-until cdecls
 
 # M4SH generated scripts
 IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
