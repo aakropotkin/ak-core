@@ -20,7 +20,7 @@
             src  = self;
 
             buildInputs = with pkgs; [autoconf automake libtool];
-            depsTargetTarget = with pkgs; [ gawk ];
+            depsTargetTarget = with pkgs; [gawk];
 
             prePatch = ''
               patchShebangs ./bootstrap.sh;

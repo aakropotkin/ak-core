@@ -41,5 +41,6 @@ AC_CONFIG_FILES([Makefile
                  src/sh-scripts/Makefile
                  src/sh-scripts/test/Makefile
                  src/zsh-scripts/Makefile
-                 src/awk-scripts/Makefile])
+                 src/awk-scripts/Makefile
+                 src/jq/Makefile])
 AC_OUTPUT
