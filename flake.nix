@@ -29,6 +29,8 @@
             preConfigure = ''
               ./bootstrap.sh;
             '';
+
+            forceShare = ["jq"];
           };
       };
 
