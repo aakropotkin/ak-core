@@ -5,7 +5,7 @@
 
   outputs = { self, nix, nixpkgs, ... }: 
     let
-      supportedSystems = [ "x86_64-linux" "i686-linux" "aarch64-linux" ];
+      supportedSystems = ["x86_64-linux" "i686-linux" "aarch64-linux"];
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems ( sys: f sys );
       version = "0.1.${nixpkgs.lib.substring 0 8 " +
                 "self.lastModifiedDate}.${self.shortRev or "dirty"}";
@@ -29,18 +29,18 @@
             preConfigure = ''
               ./bootstrap.sh;
             '';
-
-            forceShare = ["jq"];
           };
       };
 
-      defaultPackage = forAllSystems ( sys: ( import nixpkgs {
-        inherit sys;
-        overlays = [ self.overlay nix.overlay ];
-      } ).ak-core );
+      defaultPackage = forAllSystems ( sys:
+        ( import nixpkgs {
+            inherit sys;
+            overlays = [self.overlay nix.overlay];
+          }
+        ).ak-core );
 
       nixosModule = { pkgs, ... }: {
-        nixpkgs.overlays = [ self.overlay ];
+        nixpkgs.overlays = [self.overlay];
       };
     
       nixosModules.ak-core = self.nixosModule;
