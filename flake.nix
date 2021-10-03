@@ -38,7 +38,7 @@
             overlays = [self.overlay nix.overlay];
           }
         ).ak-core );
-      packages.ak-core = forAllSystems ( sys: self.defaultPackage.${sys} );
+      packages.ak-core = self.defaultPackage;
 
       nixosModule = { pkgs, ... }: {
         nixpkgs.overlays = [self.overlay];
