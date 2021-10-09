@@ -22,7 +22,7 @@ AC_DEFUN([AK_CHECK_LIB],
                     [AS_VAR_PUSHDEF([ak_Lib], [ac_cv_lib_$1""_$2])])dnl
 AC_CACHE_CHECK([for $2 in lib$1], [ak_Lib],
                [ak_check_lib_save_LIBS="$LIBS"
-               LIBS="$3 $5 $LIBS"
+               LIBS="$3 $6 $LIBS"
                AC_LINK_IFELSE([AC_LANG_CALL([], [$2])],
                               [AS_VAR_SET([ak_Lib], [yes])],
                               [AS_VAR_SET([ak_Lib], [no])])
