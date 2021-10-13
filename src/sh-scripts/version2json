@@ -1,0 +1,20 @@
+#! /usr/bin/env sh
+cat ${1:--}|sed                                        \
+  -e 's/#.*$//'                                        \
+  -e 's/\( \+\)}/\1\]/'                                \
+  -e 's/\(global\|local\):/"\1": {/'                   \
+  -e 's/extern "C\(++\)\?" {/"extern \\"C\1\\"": \[/'  \
+  -e 's/^\([a-zA-Z0-9\._]\+\) {/"\1": {/'              \
+  -e 's/ \([^;"{} ][^;"]\+\);/ "\1",/'                 \
+  -e 's/;/,/g'                                         \
+  -e '/^[[:space:]]*$/d'                               \
+  |awk '
+BEGIN { print "{"; scoped=0; }
+/(global|local):/ { if ( scoped ) { print "}"; }; scoped=1; }
+/^}/ { if ( ! scoped ) { print "  }"}; scoped=0; }
+{ print $0; }
+END { print "}"; }
+'|tr -s '\n' ' ' |sed                      \
+  -e 's/\(["}]\|\]\), *\(}\|\]\)/\1 \2/g'  \
+  -e 's/\(["}]\|\]\), *\(}\|\]\)/\1 \2/g'  \
+  |jq;
