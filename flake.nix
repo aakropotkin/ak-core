@@ -7,8 +7,9 @@
     let
       supportedSystems = ["x86_64-linux" "i686-linux" "aarch64-linux"];
       forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems ( sys: f sys );
-      version = "0.1.${nixpkgs.lib.substring 0 8 " +
-                "self.lastModifiedDate}.${self.shortRev or "dirty"}";
+      version = "0.1.0";
+      #version = "0.1.${nixpkgs.lib.substring 0 8 " +
+      #          "self.lastModifiedDate}.${self.shortRev or "dirty"}";
     in {
 
       overlay = final: prev: {
