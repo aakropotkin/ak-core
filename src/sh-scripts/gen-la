@@ -32,14 +32,77 @@ fi
 
 # ---------------------------------------------------------------------------- #
 
+function common_prefix() {
+  echo "${@}"|tr ' ' '\n'  \
+    |sed 'N;s/^\(.*\).*\n\1.*$/\1/';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+function collect_symlink_names() {
+  target="${1}";
+  names="$( basename ${target}; )";
+  while :
+  do
+    frsl="$( file -b ${target}; )";
+    if echo "${frsl}"|grep -q '^symbolic link to '; then
+      dir="$( dirname ${target}; )";
+      target="${dir}/$( echo ${frsl}|cut -d' ' -f4; )";
+      names="$( basename ${target}; ) ${names}";
+    else
+      break;
+    fi
+  done
+  echo "${names}";
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# For debugging
+function dump_vars() {
+  echo "libname:         ${lname}";
+  echo "dlname:          ${dlname}";
+  echo "library_names:   ${library_names[*]}";
+  echo "old_library:     ${old_library}";
+  echo "current:         ${vmajor}";
+  echo "age:             ${vage}";
+  echo "revision:        ${vminor}";
+  echo "installed:       ${installed}";
+  echo "dependency_libs: ${dependency_libs[*]}";
+  echo "libdir:          ${libdir}";
+  echo '';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+function _soname() {
+  readelf -dW ${1} 2>/dev/null|grep SONAME|cut -d'[' -f2|sed 's/]$//';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+dlname='';
+declare -a libnames=();
+declare -a library_names=();
+declare -a libpaths=();
+declare -a deps=();
+declare -a dependency_libs=();
+old_library='';
 vmajor=0;
 vminor=0;
 vage=0;
-libdir='';
 installed=yes;
-declare -a libnames=();
-declare -a libpaths=();
-declare -a dependency_libs=();
+libdir='';
+
+declare -a ignored_deps=(
+  'libm'
+  'libc'
+  'libgcc_s'
+);
 
 
 # ---------------------------------------------------------------------------- #
@@ -114,69 +177,13 @@ fi
 
 # ---------------------------------------------------------------------------- #
 
-function common_prefix() {
-  echo "${@}"|tr ' ' '\n'  \
-    |sed -e 'N;s/^\(.*\).*\n\1.*$/\1/';
-}
-
-
-# ---------------------------------------------------------------------------- #
-
-function collect_symlink_names() {
-  target="${1}";
-  names="$( basename ${target}; )";
-  while :
-  do
-    frsl="$( file -b ${target}; )";
-    if echo "${frsl}"|grep -q '^symbolic link to '; then
-      dir="$( dirname ${target}; )";
-      target="${dir}/$( echo ${frsl}|cut -d' ' -f4; )";
-      names="$( basename ${target}; ) ${names}";
-    else
-      break;
-    fi
-  done
-  echo "${names}";
-}
-
-
-# ---------------------------------------------------------------------------- #
-
 # find canonical library name
 lname="$( common_prefix ${libnames[*]}|sed -e 's/\.so.*$//' -e 's/\.$//'; )";
 
 
 # ---------------------------------------------------------------------------- #
 
-# For debugging
-function dump_vars() {
-  echo "libname:         ${lname}";
-  echo "dlname:          ${dlname}";
-  echo "library_names:   ${library_names[*]}";
-  echo "old_library:     ${old_library}";
-  echo "current:         ${vmajor}";
-  echo "age:             ${vage}";
-  echo "revision:        ${vminor}";
-  echo "installed:       ${installed}";
-  echo "dependency_libs: ${dependency_libs[*]}";
-  echo "libdir:          ${libdir}";
-  echo '';
-}
-
-
-# ---------------------------------------------------------------------------- #
-
-function _soname() {
-  readelf -dW ${1} 2>/dev/null|grep SONAME|cut -d'[' -f2|sed 's/]$//';
-}
-
-
-
-# ---------------------------------------------------------------------------- #
-
 # Process libnames into library_names, dlname, and old_library
-declare -a library_names=();
-old_library='';
 
 for l in ${libnames[*]}; do
   if file -b ${libdir}/${l}|grep -q '^current ar archive$'; then
@@ -261,13 +268,7 @@ fi
 
 # Collect dependencies.
 # This is going to be an approximation based on `NEEDED' entries and `R(UN)PATH'
-declare -a ignored_deps=(
-  'libm'
-  'libc'
-  'libgcc_s'
-);
 ignored_deps_pat="$( echo ${ignored_deps[*]}|tr ' ' '|'|sed 's/|$//'; )";
-declare -a deps=();
 
 # See if we have `lddtree'
 if lddtree -V 2>&1 1>/dev/null; then

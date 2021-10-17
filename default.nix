@@ -1,18 +1,10 @@
-{ stdenv, lib, autoreconf, automake, libtool, jq }:
+{ stdenv, lib, autoconf, automake, libtool, jq, gawk }:
 stdenv.mkDerivation {
   name = "ak-core";
   src = ./.;
-  version = "0.1.0";
-  buildInputs = [autoreconf automake libtool];
+  version = "0.2.0";
+  buildInputs = [autoconf automake libtool];
   depsTargetTarget = [gawk];
-  prePatch = ''
-    patchShebangs ./bootstrap.sh;
-  '';
-
-  preConfigure = ''
-    ./bootstrap.sh;
-  '';
-
   installPhase = ''
     mkdir -p $out/bin;
     mkdir -p $out/share/jq;
