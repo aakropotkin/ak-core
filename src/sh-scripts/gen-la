@@ -156,6 +156,14 @@ function dump_vars() {
 
 # ---------------------------------------------------------------------------- #
 
+function _soname() {
+  readelf -dW ${1} 2>/dev/null|grep SONAME|cut -d'[' -f2|sed 's/]$//';
+}
+
+
+
+# ---------------------------------------------------------------------------- #
+
 # Process libnames into library_names, dlname, and old_library
 declare -a library_names=();
 old_library='';
@@ -164,7 +172,10 @@ for l in ${libnames[*]}; do
   if file -b ${libdir}/${l}|grep -q '^current ar archive$'; then
     old_library="${l}";
   elif file -b ${libdir}/${l}|grep -q '^ELF 64-bit .* shared object, '; then
-    dlname="${l}";
+    soname="$( _soname ${libdir}/${l}; )";
+    if test -n "${soname}"; then
+      test -n "${soname}" && dlname="${soname}";
+    fi
     library_names+=( ${l} );
   else
     library_names+=( $( collect_symlink_names ${libdir}/${l}; ) );
@@ -191,24 +202,29 @@ fi
 # ---------------------------------------------------------------------------- #
 
 # Look for symlinks in same directory
-
-for l in $( find ${libdir} -type l -name "${lname}*"|xargs basename -a; ); do
-  if file -Lb ${libdir}/${l}|grep -q '^current ar archive$'; then
+for l in $( find ${libdir} -type l -name "${lname}*"; ); do
+  if file -Lb ${l}|grep -q '^current ar archive$'; then
     continue;
   fi
-  lreal="$( basename $( readlink -f ${libdir}/${l}; ); )";
+  lreal="$( basename $( readlink -f ${l}; ); )";
   if echo " ${library_names[*]} "|grep -q " ${lreal} " ; then
-    library_names+=( ${l} );
+    library_names+=( "$( basename ${l}; )" );
   fi
 done
 
 # Dedup
-library_names=( $( echo "${library_names[*]}"|tr ' ' '\n'|sort|uniq; ) );
+library_names=( $( echo "${library_names[*]}"|tr ' ' '\n'|sort -r|uniq; ) );
 
 
 # ---------------------------------------------------------------------------- #
 
 # Set dlname if it wasn't caught earlier.
+if test -z "${dlname}"; then
+  soname="$( _soname ${libdir}/${library_names[1]}; )";
+  if test -n "${soname}"; then
+    test -n "${soname}" && dlname="${soname}";
+  fi
+fi
 if test -z "${dlname}"; then
   for l in ${library_names[*]}; do
     if ! test -L ${libdir}/${l}; then
@@ -223,7 +239,8 @@ fi
 
 # Scrape version
 if test -n "${dlname}"; then
-  version="$( echo ${dlname}|sed 's/^lib.*\.so\.//'; )";
+  lreal="$( basename $( readlink -f ${libdir}/${dlname}; ); )";
+  version="$( echo ${lreal}|sed 's/^lib.*\.so\.//'; )";
   vmajor="$( echo ${version}|cut -d'.' -f1; )";
   vminor="$( echo ${version}|cut -d'.' -f2; )";
   vage="$( echo ${version}|cut -d'.' -f3; )";
@@ -253,6 +270,9 @@ if lddtree -V 2>&1 1>/dev/null; then
   );
 fi
 
+# Dedup
+deps=( $( echo "${deps[*]}"|tr ' ' '\n'|sort -r|uniq; ) );
+
 
 # ---------------------------------------------------------------------------- #
 
@@ -265,6 +285,9 @@ for l in ${deps[*]}; do
     dependency_libs+=( ${l} );
   fi
 done
+
+# Dedup
+dependency_libs=( $( echo "${dependency_libs[*]}"|tr ' ' '\n'|sort -r|uniq; ) );
 
 
 # ---------------------------------------------------------------------------- #
@@ -280,7 +303,7 @@ LT_TEMPLATE="\
 dlname='${dlname}'
 
 # Names of this library.
-library_names='${library_names}'
+library_names='${library_names[*]}'
 
 # The name of the static archive.
 old_library='${old_library}'
