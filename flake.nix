@@ -3,57 +3,20 @@
 
   inputs.nixpkgs.follows = "nix/nixpkgs";
 
-  outputs = { self, nix, nixpkgs, ... }: 
-    let
-      supportedSystems = ["x86_64-linux" "i686-linux" "aarch64-linux"];
-      forAllSystems = f: nixpkgs.lib.genAttrs supportedSystems ( sys: f sys );
-      version = "0.1.0";
-      #version = "0.1.${nixpkgs.lib.substring 0 8 " +
-      #          "self.lastModifiedDate}.${self.shortRev or "dirty"}";
-    in {
+  outputs = { self, nix, nixpkgs, ... }: {
 
-      overlay = final: prev: {
-        ak-core = with final;
-          let
-            nix = final.nix;
-          in stdenv.mkDerivation {
-            name = "ak-core";
-            src  = self;
+    overlays.ak-core = import ./overlay.nix;
+    overlay = self.overlays.ak-core;
 
-            buildInputs = with pkgs; [autoconf automake libtool];
-            depsTargetTarget = with pkgs; [gawk];
+    packages.x86_64-linux.ak-core = ( import nixpkgs {
+      sys = "x86_64-linux";
+      overlays = [self.overlay nix.overlay];
+    } ).ak-core;
+    defaultPackage.x86_64-linux = self.packages.x86_64-linux.ak-core;
 
-            prePatch = ''
-              patchShebangs ./bootstrap.sh;
-            '';
-
-            preConfigure = ''
-              ./bootstrap.sh;
-            '';
-
-            installPhase = ''
-              mkdir -p $out/bin;
-              mkdir -p $out/share/jq;
-              make install;
-            '';
-
-          };
-      };
-
-      defaultPackage = forAllSystems ( sys:
-        ( import nixpkgs {
-            inherit sys;
-            overlays = [self.overlay nix.overlay];
-          }
-        ).ak-core );
-      packages = forAllSystems ( sys:
-        { ak-core = self.defaultPackage.${sys}; } );
-
-      nixosModule = { pkgs, ... }: {
-        nixpkgs.overlays = [self.overlay];
-      };
-    
-      nixosModules.ak-core = self.nixosModule;
-
+    nixosModules.ak-core = { pkgs, ... }: {
+      nixpkgs.overlays = [self.overlay];
     };
+    nixosModule = self.nixosModules.ak-core;
+  };
 }
