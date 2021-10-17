@@ -1,1 +1,1 @@
-final: prev: { ak-core = { ak-core = final.callPackage ./default.nix {}; }; }
+final: prev: { ak-core = final.callPackage ./default.nix {}; }
