@@ -6,7 +6,9 @@ bin_SCRIPTS += drop-until cdecls gen-la
 # M4SH generated scripts
 IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
 M4SH_TARGETS =  needs rpath soname $(IS_ELF_TARGETS)
-bin_SCRIPTS  += $(M4SH_TARGETS)
+#bin_SCRIPTS  += $(M4SH_TARGETS)
+bin_SCRIPTS += is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
+bin_SCRIPTS += needs rpath soname
 CLEANFILES   =  $(M4SH_TARGETS)
 
 SUBDIRS = test

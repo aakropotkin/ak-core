@@ -29,6 +29,13 @@
             preConfigure = ''
               ./bootstrap.sh;
             '';
+
+            installPhase = ''
+              mkdir -p $out/bin;
+              mkdir -p $out/share/jq;
+              make install;
+            '';
+
           };
       };
 
