@@ -14,7 +14,7 @@ CC=${CC:-`which cc`};
 LDFLAGS='-Wl,--defsym,main=.';
 LDFLAGS+=" -Wl,--whole-archive ${LIB}";
 LDFLAGS+=' -Wl,--no-whole-archive';
-nm ${LIB}|grep -q '^_Z' && LDFLAGS+=' -x c++';
+nm ${LIB}|grep -q '^_Z' && CC=${CXX:-`which g++`};
 TMP=$( mktemp; );
 trap "rm -f ${TMP} 2>&1 1>/dev/null; exit 1;" HUP INT QUIT PIPE TERM;
 ${CC} ${LDFLAGS} -o ${TMP};
