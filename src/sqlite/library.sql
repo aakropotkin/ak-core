@@ -1,11 +1,13 @@
-CREATE TABLE SYMBOLS(
-    ID          INTEGER  PRIMARY KEY AUTOINCREMENT,
+
+/* Explicitly a symbol in the scope of a library */
+CREATE TABLE LIBSYMBOLS(
+    LIBSYMID    INTEGER  PRIMARY KEY AUTOINCREMENT,
     /* Usually `sym.<REALNAME>' */
     FLAGNAME    TEXT     UNIQUE,
     /* Demangled name */
     NAME        TEXT     NOT NULL,
     /* Mangled name */
-    REALNAME    TEXT,
+    REALNAME    TEXT     NOT NULL,
     /* Index in symtab */
     ORDINAL     INTEGER  UNIQUE,
     /* Global, Local, Weak, LoProc, HiProc */
@@ -15,11 +17,13 @@ CREATE TABLE SYMBOLS(
     /* C, C++ */
     LANG        TEXT,
     /* 0 ( False ), 1 ( True ) */
-    IMPORTED    NUMERIC
+    IMPORTED    NUMERIC,
+    LIBID       INTEGER NOT NULL
   );
 
-create table library(
-    ID           INTEGER PRIMARY KEY AUTOINCREMENT,
+
+CREATE TABLE LIBRARY(
+    LIBID        INTEGER PRIMARY KEY AUTOINCREMENT,
     /* Filesystem Name */
     FSNAME       TEXT,
     SONAME       TEXT,
@@ -45,6 +49,8 @@ create table library(
     COMPILER     TEXT,
     /* ??? */
     CRYPTO       NUMERIC,
+    /* Debug info file */
+    DEBUGFILE    TEXT,
     /* 0 ( Little ), 1 ( BIG ) */
     BIG_ENDIAN   NUMERIC,
     /* 0 ( False ), 1 ( Has Debug sources ) */
@@ -79,6 +85,10 @@ create table library(
     STRIPPED     NUMERIC,
     /* linux, ... */
     SUBSYSTEM    TEXT,
-    /* 0 ( False ), 1 ( True ) */
-    VA           NUMERIC
+    /* ??? 0 ( False ), 1 ( True ) */
+    VA           NUMERIC,
+    /* For shared/static library pairs, the other lib */
+    OTHERLIBID   INTEGER,
+    /* Foreign key for member of a package */
+    PKGID        INTEGER
   );
