@@ -12,6 +12,7 @@ fi
 
 CC=${CC:-`which cc`};
 LDFLAGS='-Wl,--defsym,main=.';
+LDFLAGS+=" -Wl,--unresolved-symbols,ignore-all";
 LDFLAGS+=" -Wl,--whole-archive ${LIB}";
 LDFLAGS+=' -Wl,--no-whole-archive';
 nm ${LIB}|grep -q '^_Z' && CC=${CXX:-`which g++`};
