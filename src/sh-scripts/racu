@@ -1,0 +1,24 @@
+#! /usr/bin/env sh
+racu   rabin2 for any compilation unit
+USAGE: racu FILE FLAGS...
+USAGE: racu libfoo.a -Elij
+LIB=${1};
+shift;
+
+if file -Lb ${LIB}|grep -q '^ELF \(32\|64\)-bit LSB '; then
+  rabin2 ${@} ${LIB};
+  exit ${?};
+fi
+
+CC=${CC:-`which cc`};
+LDFLAGS='-Wl,--defsym,main=.';
+LDFLAGS+=" -Wl,--whole-archive ${1}";
+LDFLAGS+=' -Wl,--no-whole-archive';
+nm ${1}|grep -q '^_Z' && LDFLAGS+=' -x c++';
+TMP=$( mktemp -p; );
+trap "rm -f ${TMP} 2>&1 1>/dev/null; exit 1;" HUP INT QUIT PIPE TERM;
+${CC} ${LDFLAGS} -o ${TMP};
+rabin2 ${@} ${TMP};
+RSL=${?};
+rm -rf ${TMP} 2>&1 1>/dev/null;
+exit ${RSL};
