@@ -1,12 +1,21 @@
 #! /usr/bin/env sh
 # racu   rabin2 for any compilation unit
-# USAGE: racu FILE FLAGS...
-# USAGE: racu libfoo.a -Elij
-LIB=${1};
-shift;
+# USAGE: racu FLAGS... FILE
+# USAGE: racu -Elij libfoo.a 
+
+R2FLAGS='';
+LIB='';
+
+while test "${#}" -gt 0; do
+  case "${1}" in
+    -*) R2FLAGS+=" ${1}"; ;;
+    *)  LIB="${1}"; ;;
+  esac
+  shift;
+done
 
 if file -Lb ${LIB}|grep -q '^ELF \(32\|64\)-bit LSB '; then
-  rabin2 ${@} ${LIB};
+  rabin2 ${R2FLAGS} ${LIB};
   exit ${?};
 fi
 
@@ -19,7 +28,7 @@ nm ${LIB}|grep -q '^_Z' && CC=${CXX:-`which g++`};
 TMP=$( mktemp; );
 trap "rm -f ${TMP} 2>&1 1>/dev/null; exit 1;" HUP INT QUIT PIPE TERM;
 ${CC} ${LDFLAGS} -o ${TMP};
-rabin2 ${@} ${TMP};
+rabin2 ${R2FLAGS} ${TMP};
 RSL=${?};
 rm -rf ${TMP} 2>&1 1>/dev/null;
 exit ${RSL};
