@@ -337,8 +337,9 @@ top_srcdir = @top_srcdir@
 #bin_SCRIPTS  += $(M4SH_TARGETS)
 bin_SCRIPTS = cuts depgraph displays joinlines lorder wsmerge \
 	json-syms cdeps trim wslines cincludes ak-ifnames get-m4-path \
-	get-m4-files drop-until cdecls gen-la lines-prefix is-elf-cu \
-	is-elf-so is-elf-ex is-elf-bin is-elf-ar needs rpath soname
+	get-m4-files drop-until cdecls gen-la lines-prefix racu \
+	is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar needs rpath \
+	soname
 
 # M4SH generated scripts
 IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar

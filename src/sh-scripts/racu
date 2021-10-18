@@ -1,7 +1,7 @@
 #! /usr/bin/env sh
-racu   rabin2 for any compilation unit
-USAGE: racu FILE FLAGS...
-USAGE: racu libfoo.a -Elij
+# racu   rabin2 for any compilation unit
+# USAGE: racu FILE FLAGS...
+# USAGE: racu libfoo.a -Elij
 LIB=${1};
 shift;
 
@@ -12,10 +12,10 @@ fi
 
 CC=${CC:-`which cc`};
 LDFLAGS='-Wl,--defsym,main=.';
-LDFLAGS+=" -Wl,--whole-archive ${1}";
+LDFLAGS+=" -Wl,--whole-archive ${LIB}";
 LDFLAGS+=' -Wl,--no-whole-archive';
-nm ${1}|grep -q '^_Z' && LDFLAGS+=' -x c++';
-TMP=$( mktemp -p; );
+nm ${LIB}|grep -q '^_Z' && LDFLAGS+=' -x c++';
+TMP=$( mktemp; );
 trap "rm -f ${TMP} 2>&1 1>/dev/null; exit 1;" HUP INT QUIT PIPE TERM;
 ${CC} ${LDFLAGS} -o ${TMP};
 rabin2 ${@} ${TMP};
