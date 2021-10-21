@@ -1,0 +1,24 @@
+#! /usr/bin/env sh
+ 
+# Detect C++ABI11 usage in a compiled unit/binary.
+ 
+declare -a ABI11_PATS;
+ABI11_PATS=(
+    'std::list'
+    'std::_List_impl'
+    'std::_List_base'
+    'std::pair'
+    'complex::real'
+    'complex::imag'
+    'map::erase'
+    'multimap::erase'
+    'set::erase'
+    'multiset::erase'
+    '_Rb_tree.*::erase'
+    'vector::data'
+    'std::operator-'
+    'istreambuf_iterator::reference'
+    'std::basic_string'
+  );
+{ nm -gDC ${1} 2>/dev/null||nm -gC 2>/dev/null }       \
+  |egrep -q "$( echo ${ABI11_PATS[*]}|tr ' ' '|'; )";
