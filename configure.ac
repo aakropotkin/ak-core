@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.71])
-AC_INIT([ak-core], [0.0.1], [alex.ameen.tx@gmail.com])
+AC_INIT([ak-core], [0.3.0], [alex.ameen.tx@gmail.com])
 
 AC_CONFIG_MACRO_DIRS([m4])
 AC_CONFIG_AUX_DIR([build-aux])

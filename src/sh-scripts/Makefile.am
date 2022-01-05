@@ -1,5 +1,5 @@
 
-bin_SCRIPTS =  cuts depgraph displays joinlines lorder wsmerge json-syms
+bin_SCRIPTS =  cuts displays joinlines lorder wsmerge json-syms
 bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames get-m4-path get-m4-files
 bin_SCRIPTS += drop-until cdecls gen-la lines-prefix racu
 bin_SCRIPTS += elf-cflags
