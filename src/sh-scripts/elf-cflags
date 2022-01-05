@@ -1,0 +1,89 @@
+#! /usr/bin/env sh
+# -*- mode: sh-shell; -*-
+# ============================================================================ #
+#
+#
+# ---------------------------------------------------------------------------- #
+
+function usage() {
+  cat <<EOF >&${1:-1}
+elf-cflags [DWARF-DEPTH] FILE
+  DWARF-DEPTH   Search depth for DWARF data, as used by \`objdump'
+  FILE          An ELF binary ( executable or shared object )
+EOF
+}
+
+
+
+# ---------------------------------------------------------------------------- #
+
+DWARF_DEPTH=1;
+
+case ${#} in
+  2) DWARF_DEPTH=${1}; shift ;;
+  1) ;;
+  *) usage 2; exit 1; ;;
+esac
+
+TARGET=${1};
+shift;
+
+
+# ---------------------------------------------------------------------------- #
+
+if test ! -f ${TARGET}; then
+  echo "No such file \`${TARGET}'" >&2;
+  exit 3;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+function _is_elf_bin() {
+  file -Lm ${1} 2>&1                                                       \
+    |grep -q '^ELF \(32\|64\)-bit LSB \(executable\|shared object\), .*';
+}
+
+if ! _is_elf_bin ${TARGET}; then
+  echo "File \`${TARGET}' is not an ELF binary" >&2;
+  exit 4;  
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+function _has_dwarf() {
+  objdump -w -Wi ${1} 2>&1|grep -q DW_AT_producer;
+}
+
+
+function _has_comment() {
+  objdump -h -w ${1}|grep -q '[0-9]\+ \.comment';
+}
+
+
+function _has_gcc_flags() {
+  objdump -h -w ${1}|grep -q '[0-9]\+ \.GCC\.command\.line';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+if _has_dwarf ${TARGET}; then
+  objdump -w -Wi --dwarf-start=0 --dwarf-depth=${DWARF_DEPTH} ${TARGET}; 
+  exit ${?};
+elif _has_gcc_flags ${TARGET}; then
+  readelf -p .GCC.command.line ${TARGET};
+  exit ${?};
+else
+  echo "File \`${TARGET}' does not contain metadata for compilation flags" >&2;
+  exit 0;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+
+
+# ============================================================================ #
+# vim: set filetype=sh :
