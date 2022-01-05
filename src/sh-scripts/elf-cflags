@@ -40,7 +40,7 @@ fi
 # ---------------------------------------------------------------------------- #
 
 function _is_elf_bin() {
-  file -Lm ${1} 2>&1                                                       \
+  file -Lb ${1} 2>&1                                                       \
     |grep -q '^ELF \(32\|64\)-bit LSB \(executable\|shared object\), .*';
 }
 
