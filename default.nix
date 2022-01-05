@@ -1,14 +1,13 @@
-{ stdenv, lib, autoconf, automake, libtool, jq, gawk }:
+{ stdenv, lib, autoreconfHook, jq, gawk }:
 stdenv.mkDerivation {
-  name = "ak-core";
+  pname = "ak-core";
   src = ./.;
   version = "0.2.0";
-  buildInputs = [autoconf automake libtool];
+  nativeBuildInputs = [autoreconfHook];
   depsTargetTarget = [gawk];
-  installPhase = ''
+  preInstall = ''
     mkdir -p $out/bin;
     mkdir -p $out/share/jq;
-    make install;
   '';
   meta.license = lib.licenses.gpl3;
 }
