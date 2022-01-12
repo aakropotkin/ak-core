@@ -70,10 +70,10 @@ m4_define([ELF_GET_COMMENT_SECTION],
 
 # ---------------------------------------------------------------------------- #
 
-m4_divert
-ELF_GET_SECTION_STRINGS([libfoo.so], [\.comment])
-ELF_GET_COMMENT_SECTION([libfoo.so])
-m4_divert(KILL)
+dnl m4_divert
+dnl ELF_GET_SECTION_STRINGS([libfoo.so], [\.comment])
+dnl ELF_GET_COMMENT_SECTION([libfoo.so])
+dnl m4_divert(KILL)
 
 
 # ---------------------------------------------------------------------------- #
