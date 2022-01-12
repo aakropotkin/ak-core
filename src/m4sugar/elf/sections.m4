@@ -26,7 +26,7 @@ m4_define([ELF_GET_SECTION_NAMES],
 # ELF_HAS_SECTION(FILE, NAME)
 # ---------------------------
 m4_define([ELF_HAS_SECTION],
-[ELF_GET_SECTION_NAMES([$1])|grep -qi '^\.\?$2@S|@'[]dnl
+[ELF_GET_SECTION_NAMES([$1])|grep -qi '^$2@S|@'[]dnl
 ])# ELF_HAS_SECTION
 
 
@@ -35,7 +35,7 @@ m4_define([ELF_HAS_SECTION],
 # ELF_HAS_COMMENT_SECTION(FILE)
 # -----------------------------
 m4_define([ELF_HAS_COMMENT_SECTION],
-[ELF_HAS_SECTION([$1], [comment])[]dnl
+[ELF_HAS_SECTION([$1], [\.comment])[]dnl
 ])# ELF_HAS_COMMENT_SECTION
 
 
@@ -44,8 +44,36 @@ m4_define([ELF_HAS_COMMENT_SECTION],
 # ELF_HAS_GCC_FLAGS_SECTION(FILE)
 # -------------------------------
 m4_define([ELF_HAS_GCC_FLAGS_SECTION],
-[ELF_HAS_SECTION([$1], [GCC\.command\.line])[]dnl
+[ELF_HAS_SECTION([$1], [\.GCC\.command\.line])[]dnl
 ])# ELF_HAS_COMMENT_SECTION
+
+
+# ---------------------------------------------------------------------------- #
+
+# ELF_GET_SECTION_STRINGS(FILE, SECTION)
+# --------------------------------------
+m4_define([ELF_GET_SECTION_STRINGS],
+[[readelf -W -p $2 $1 2>/dev/null|grep '\[[ 0-9]\+\] ']dnl
+[|sed 's/^[[:space:]]*\[[ 0-9]\+\] //']dnl
+])# ELF_GET_SECTION_STRINGS
+
+
+# ---------------------------------------------------------------------------- #
+
+# ELF_GET_COMMENT_SECTION(FILE)
+# -----------------------------
+m4_define([ELF_GET_COMMENT_SECTION],
+[ELF_GET_SECTION_STRINGS([$1], [\.comment])[]dnl
+|sed -e 's/^ *//' -e 's/ *@S|@//'[]dnl
+])# ELF_GET_COMMENT_SECTION
+
+
+# ---------------------------------------------------------------------------- #
+
+m4_divert
+ELF_GET_SECTION_STRINGS([libfoo.so], [\.comment])
+ELF_GET_COMMENT_SECTION([libfoo.so])
+m4_divert(KILL)
 
 
 # ---------------------------------------------------------------------------- #
