@@ -7,7 +7,7 @@
 # ELF_GET_SECTIONS(FILE)
 # ----------------------
 m4_define([ELF_GET_SECTIONS],
-[[readelf -SW $1|grep '\[[ 0-9]\+\] \.'|tr -s '[] ' ' ']dnl
+[[readelf -SW $1|grep '\[[ a-f0-9]\+\] \.'|tr -s '[] ' ' ']dnl
 [|sed -e 's/^ //' -e 's/ @S|@//' -e 's/\([0-9]\+ \.[^ ]* [^ ]*\) .*@S|@/\1/']dnl
 ])# ELF_GET_SECTIONS
 
@@ -54,7 +54,7 @@ m4_define([ELF_HAS_GCC_FLAGS_SECTION],
 # --------------------------------------
 m4_define([ELF_GET_SECTION_STRINGS],
 [[readelf -W -p $2 $1 2>/dev/null|grep '\[[ 0-9]\+\] ']dnl
-[|sed 's/^[[:space:]]*\[[ 0-9]\+\] //']dnl
+[|sed 's/^[[:space:]]*\[[ a-f0-9]\+\] //']dnl
 ])# ELF_GET_SECTION_STRINGS
 
 
