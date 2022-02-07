@@ -1,0 +1,136 @@
+#! /usr/bin/env sh
+# -*- mode: sh-mode; -*-
+# ============================================================================ #
+
+
+# ---------------------------------------------------------------------------- #
+
+as_me=symlink-samedir-p;
+
+# Arguments/Options
+TARGET='';
+VERBOSE=no;
+QUIET=no;
+ALLOW_ABSOLUTE=no;
+
+
+# ---------------------------------------------------------------------------- #
+
+function usage() {
+  USAGE_MESSAGE="\
+Usage: ${as_me} [OPTION...] FILE
+Detect if a symlink points to a file in the same directory.
+Exit 0 for "true", 1 for "false", or failure code.
+
+Options:
+  -v, --verbose         Print yes/no result to stdout.
+  -q, --quiet           Do not print error messages.
+  -a, --allow-absolute  Allow non-relative symlinks while checking.
+  -h, --help            Print this help message.";
+
+
+  EXIT_STATUS=${1:-2};
+
+  if test ${EXIT_STATUS} = 0; then
+    echo "${USAGE_MESSAGE}";
+  else
+    echo "${USAGE_MESSAGE}" >&2;
+  fi
+
+  exit ${EXIT_STATUS};
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+function perror() {
+  EXIT_STATUS=${1};
+  shift;
+  test "${QUIET}" != yes && echo "${as_me}: ${@}" >&2;
+  test "${EXIT_STATUS}" != '-' && exit ${EXIT_STATUS};
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+LONG_OPTS='-l quiet -l allow-absolute -l help -l verbose';
+OPTIONS="$( getopt -n ${as_me} ${LONG_OPTS} -o 'qahv' -- ${@}; )";
+VALID_OPTIONS=${?};
+
+if test ${VALID_OPTIONS} != 0; then
+  perror - "encountered invalid options";
+  usage 2;
+fi
+
+eval set -- "${OPTIONS}";
+while :
+do
+  case "${1}" in
+    -v|--verbose)        VERBOSE=yes; ;;
+    -q|--quiet)          QUIET=yes; ;;
+    -a|--allow-absolute) ALLOW_ABSOLUTE=yes; ;;
+    -h|--help)           usage 0; ;;
+    --)
+        shift;
+        break;
+      ;;
+    *)
+        if test -z "${TARGET}"; then
+          TARGET="${1}";
+        else
+          perror - "unexpected option: '${1}'";
+          usage 2;
+        fi
+      ;;
+  esac
+  shift;
+done
+if test -z "${TARGET}" && test "${#}" -gt 0; then
+  TARGET="${1}";
+  shift;
+else
+  perror - "You must provide a filename";
+  usage 2;
+fi
+
+# ---------------------------------------------------------------------------- #
+
+if test ! -f ${TARGET}; then
+  perror 3 "No such file or directory: ${TARGET}";
+fi
+
+if test ! -L ${TARGET}; then
+  perror 4 "File ${TARGET} is not a symlink";
+fi
+
+LINK_PATH="$( stat --printf='%N' ${TARGET}|cut -d\' -f4; )";
+
+if test "${ALLOW_ABSOLUTE}" != yes; then
+  if echo "${LINK_PATH}"|grep -q '^/'; then
+    perror 5 "Symlink ${TARGET} is non-relative";
+  fi
+fi
+
+LINK_DIRNAME="$( dirname ${LINK_PATH}; )";
+if test "${LINK_DIRNAME}" = '.'; then
+  test "${VERBOSE}" = yes && echo yes;
+  exit 0;
+else
+  if test "${ALLOW_ABSOLUTE}" = yes; then
+    TARGET_DIRNAME="$( dirname $( readlink -f ${TARGET}; ); )";
+    if test "${LINK_DIRNAME}" = "${TARGET_DIRNAME}"; then
+      test "${VERBOSE}" = yes && echo yes;
+      exit 0;
+    fi
+  fi
+  test "${VERBOSE}" = yes && echo no;
+  exit 1;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+
+
+# ============================================================================ #
+# vim: set filetype=sh :
