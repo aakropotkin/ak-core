@@ -19,7 +19,7 @@ while test "${#}" -gt 0; do
   fi
 done
 
-eval /usr/bin/env ${MAKE} ${IGNORE_ENV}                            \
+eval /usr/bin/env ${IGNORE_ENV}                                    \
   ${MAKE} ${FLAGS} ${@}                                            \
     |${GREP} '^[a-zA-Z_\.][a-zA-Z_\.0-9]* *[ ?:]*='                \
     |${SED} 's/^\([a-zA-Z_\.][a-zA-Z_\.0-9]*\) *[ ?:]*= */\1 = /'
