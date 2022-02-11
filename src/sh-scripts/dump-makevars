@@ -16,6 +16,7 @@ LONG_OPTS='-l all -l keep-env -l no-query -l nrm';
 OPTIONS="$( getopt -n ${as_me} ${LONG_OPTS} -o aIQN -- ${@}; )";
 VALID_OPTIONS=${?};
 test "${VALID_OPTIONS}" != 0 && exit ${VALID_OPTIONS};
+eval set -- "${OPTIONS}";
 while :
 do
   case "${1}" in
