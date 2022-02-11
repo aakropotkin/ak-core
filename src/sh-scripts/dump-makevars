@@ -1,25 +1,46 @@
 #! /usr/bin/env sh
 
+as_me=dump-makevars;
+
 test -z "$MAKE" && MAKE=$( which make; );
 test -z "$GREP" && GREP=$( which grep; );
 test -z "$SED" && SED=$( which sed; );
 
-FLAGS='-qpRrsi';
+IGNORE_MAKE='-Rs';
 IGNORE_ENV='-i';
+QUERY='-q';
+QUIET=no;
+NRM=no;
 
-while test "${#}" -gt 0; do
-  if test "${1}" = '-a' || test "${1}" = '--all'; then
-    FLAGS='-qpsi';
-    shift;
-  elif test "${1}" = '-I' || test "${1}" = '--keep-env'; then
-    IGNORE_ENV='';
-    shift;
-  else
-    break;
-  fi
+LONG_OPTS='-l all -l keep-env -l no-query -l nrm';
+OPTIONS="$( getopt -n ${as_me} ${LONG_OPTS} -o aIQN -- ${@}; )";
+VALID_OPTIONS=${?};
+test "${VALID_OPTIONS}" != 0 && exit ${VALID_OPTIONS};
+while :
+do
+  case "${1}" in
+    -a|--all)       IGNORE_MAKE=''; ;;
+    -I|--keep-env)  IGNORE_ENV=''; ;;
+    -Q|--no-query)  QUERY=''; ;;
+    -N|--nrm)       NRM=yes; QUERY=''; QUIET=yes; ;;
+    --)             shift; break; ;;
+    *)              break; ;;
+  esac
+  shift;
 done
 
-eval /usr/bin/env ${IGNORE_ENV}                                    \
-  ${MAKE} ${FLAGS} ${@}                                            \
-    |${GREP} '^[a-zA-Z_\.][a-zA-Z_\.0-9]* *[ ?:]*='                \
-    |${SED} 's/^\([a-zA-Z_\.][a-zA-Z_\.0-9]*\) *[ ?:]*= */\1 = /';
+test -z "${FLAGS}" && FLAGS="${IGNORE_MAKE} ${QUERY} -sip";
+test "${NRM}" = yes && EXTRA='FARM=0';
+
+function runnit() {
+  eval "/usr/bin/env ${IGNORE_ENV}                                      \
+    ${MAKE} ${FLAGS} ${@} ${EXTRA}                                      \
+      |${GREP} '^[a-zA-Z_\\.][a-zA-Z_\.0-9]* *[ ?:]*='                  \
+      |${SED} 's/^\\([a-zA-Z_\.][a-zA-Z_\.0-9]*\) *[ ?:]*= */\1 = /';";
+}
+
+if test "${QUIET}" = yes; then
+  runnit ${@} 2>/dev/null;
+else
+  runnit ${@};
+fi
