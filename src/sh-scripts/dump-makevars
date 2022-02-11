@@ -1,7 +1,7 @@
 #! /usr/bin/env sh
 
 FLAGS='-qpRrsi';
-if test "${#} -gt 0; then
+if test "${#}" -gt 0; then
   if test "${1}" = '-a' || test "${1}" = '--all'; then
     FLAGS='-qpsi';
     shift;
