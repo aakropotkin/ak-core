@@ -1,7 +1,7 @@
 {
   description = "A handful of useful core utilities and scripts for Linux";
 
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.flake-utils.url = github:numtide/flake-utils;
 
   outputs = { self, nixpkgs, ... }: {
     overlays.ak-core = import ./overlay.nix;
