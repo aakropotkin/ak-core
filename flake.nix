@@ -13,6 +13,12 @@
     } ).ak-core;
     defaultPackage.x86_64-linux = self.packages.x86_64-linux.ak-core;
 
+    packages.aarch64-linux.ak-core = ( import nixpkgs {
+      sys = "aarch64-linux";
+      overlays = [self.overlay];
+    } ).ak-core;
+    defaultPackage.aarch64-linux = self.packages.aarch64-linux.ak-core;
+
     nixosModules.ak-core = { pkgs, ... }: {
       nixpkgs.overlays = [self.overlay];
     };
