@@ -1,0 +1,141 @@
+#! /usr/bin/env bash
+# ============================================================================ #
+#
+# Checks if programs are available in PATH.
+# USAGE: has-programs OPTIONS [--] PROG...
+#
+# See `usage' function below for additional details.
+#
+#
+# ---------------------------------------------------------------------------- #
+
+set -euo pipefail;
+
+as_me="has-programs";
+
+: ${COMMAND="command"};
+: ${WHICH="$COMMAND $COMMAND -v"};
+: ${TEST="test"};
+: ${READLINK="readlink"};
+: ${PRINTF="printf"};
+: ${ECHO="$PRINTF %s\n"};
+: ${TRUE=":"};
+
+: ${QUIET=0};
+: ${OUTPUT_YN=0};
+: ${IGNORE=0};
+
+
+# ---------------------------------------------------------------------------- #
+
+function usage() {
+  $ECHO "\
+Checks if programs are available in PATH.
+  Prints \"PROG: found at PATH\" or \"PROG: not found\" by default.
+  Prints \"PROG: yes\" or \"PROG: no\" if the -b or --yes-no flag are given.
+  Sets exit status to the number of programs which were not found.
+USAGE: $as_me OPTIONS [--] PROG...
+OPTIONS
+  -h,--help    Print this help message
+  -b,--yes-no  Only print yes/no foreach program.
+  -q,--quiet   Print nothing, set exit status to 0 if all programs are found,
+               or the number of programs which could not be found otherwise.
+  -i,--ignore  Do not return a non-zero exit status.
+";
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+while $TEST "$#" -gt 0; do
+  case "$1" in
+    -b|--yes-no)
+      OUTPUT_YN=1;
+    ;;
+    -h|--help)
+      usage;
+      exit 0;
+    ;;
+    -q|--quiet)
+      QUIET=1;
+    ;;
+    -i|--ignore)
+      IGNORE=1;
+    ;;
+    --)
+      shift;
+      break;
+    ;;
+    *)
+      break;
+    ;;
+  esac
+  shift;
+done
+
+if $TEST "$#" -lt 1; then
+  $ECHO "$as_me: You must provide the name of a program to search for." >&2;
+  usage;
+  exit 1;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+function has_prog() {
+  $TEST -n "$( $WHICH $1; )";
+}
+
+function prog_path() {
+  $READLINK -f "$( $WHICH $1; )";
+}
+
+function check_prog() {
+  if has_prog "$1"; then
+    if $TEST "$OUTPUT_YN" = 0; then
+      $ECHO "$1: found at $( prog_path $1; )";
+    else
+      $ECHO "$1: yes";
+    fi
+    return 0;
+  else
+    if $TEST "$OUTPUT_YN" = 0; then
+      $ECHO "$1: not found";
+    else
+      $ECHO "$1: no";
+    fi
+    return 1;
+  fi
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+if $TEST "$QUIET" = 0; then
+  CHECK_CMD=check_prog;
+else
+  CHECK_CMD=has_prog;
+fi
+
+NOT_FOUND=0;
+
+while $TEST "$#" -gt 0; do
+  if ! $CHECK_CMD "$1"; then
+    NOT_FOUND="$(( NOT_FOUND + 1 ))";
+  fi
+  shift;
+done
+
+if $TEST "$IGNORE" = 0; then
+  exit $NOT_FOUND;
+else
+  exit 0;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+#
+#
+#
+# ============================================================================ #
+# vim: set filetype=sh :
