@@ -5,22 +5,33 @@
 
   outputs = { self, nixpkgs, ... }: {
     overlays.ak-core = import ./overlay.nix;
-    overlay = self.overlays.ak-core;
 
     packages.x86_64-linux.ak-core = ( import nixpkgs {
       sys = "x86_64-linux";
-      overlays = [self.overlay];
+      overlays = [self.overlays.ak-core];
     } ).ak-core;
-    defaultPackage.x86_64-linux = self.packages.x86_64-linux.ak-core;
+    packages.x86_64-linux.default = self.packages.x86_64-linux.ak-core;
 
     packages.aarch64-linux.ak-core = ( import nixpkgs {
       sys = "aarch64-linux";
-      overlays = [self.overlay];
+      overlays = [self.overlays.ak-core];
     } ).ak-core;
-    defaultPackage.aarch64-linux = self.packages.aarch64-linux.ak-core;
+    packages.aarch64-linux.default = self.packages.aarch64-linux.ak-core;
+
+    packages.x86_64-darwin.ak-core = ( import nixpkgs {
+      sys = "x86_64-darwin";
+      overlays = [self.overlays.ak-core];
+    } ).ak-core;
+    packages.x86_64-darwin.default = self.packages.x86_64-darwin.ak-core;
+
+    packages.aarch64-darwin.ak-core = ( import nixpkgs {
+      sys = "aarch64-darwin";
+      overlays = [self.overlays.ak-core];
+    } ).ak-core;
+    packages.aarch64-darwin.default = self.packages.aarch64-darwin.ak-core;
 
     nixosModules.ak-core = { pkgs, ... }: {
-      nixpkgs.overlays = [self.overlay];
+      nixpkgs.overlays = [self.overlays.ak-core];
     };
     nixosModule = self.nixosModules.ak-core;
   };
