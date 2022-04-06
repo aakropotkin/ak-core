@@ -1,4 +1,4 @@
-name: "Test"
+name: AK-Core Basic Tests
 on:
   pull_request:
   push:
@@ -9,11 +9,9 @@ jobs:
     - uses: actions/checkout@v3
     - uses: cachix/install-nix-action@v16
       with:
-        name: ak-core-basic-test
-        nix_path: nixpkgs=channel:nixos-unstable
         extra_nix_config: |
           experimental-features = nix-command flakes
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-    - uses: cachix/cachix-action@v10
     - run: nix build --impure
     - run: nix flake check --impure
+    - run: nix-shell --run "echo OK"
