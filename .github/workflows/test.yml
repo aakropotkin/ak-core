@@ -14,4 +14,4 @@ jobs:
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     - run: nix build --impure
     - run: nix flake check --impure
-    - run: nix-shell --run "echo OK"
+    - run: nix shell --impure nixpkgs#bashInteractive -c bash -c "echo OK"
