@@ -1,6 +1,15 @@
 #! /usr/bin/env sh
 # -*- mode: sh-mode; -*-
 # ============================================================================ #
+#
+#
+# ---------------------------------------------------------------------------- #
+
+: "${CAT=cat}";
+: "${CUT=cut}";
+: "${TR=tr}";
+: "${PRINTF=printf}";
+: "${ECHO=echo}";
 
 
 # ---------------------------------------------------------------------------- #
@@ -29,7 +38,7 @@ Each range is one of:
 GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
 Full documentation <https://www.gnu.org/software/coreutils/cut>
 or available locally via: info '(coreutils) cut invocation'";
-  echo "$MESSAGE";
+  $ECHO "$MESSAGE";
 }
 
 
@@ -55,7 +64,7 @@ shift $(( OPTIND - 1 ));
 # in actual inputs... because why would it?
 # `tr -s' "joins" repeated output characters, which in this case effectively
 # causes `cuts' to ignore empty fields.
-cat "${@:--}"|tr -s "$delims" '\06'|cut -d "$( printf '\x06'; )" -f "$field";
+$CAT "${@:--}"|$TR -s "$delims" '\06'|$CUT -d "$( printf '\x06'; )" -f "$field";
 
 
 # ---------------------------------------------------------------------------- #
