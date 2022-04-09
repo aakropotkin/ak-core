@@ -2,7 +2,7 @@
 
 as_me=drop-until;
 
-function usage() {
+usage() {
   MESSAGE="\
 Usage: $as_me [OPTION...] [FILE]
 Print lines beginning at matching line. Regular expressions use \`sed' syntax.
@@ -15,75 +15,73 @@ Output is sent to STDOUT unless \`--in-place' ( \`-i' ) flag is given.
   -e, --exclude            do not include matching line in output
   -h, --help               print this usage message
 ";
-  if test "x${1:-1}" = x0; then
-    echo "${MESSAGE}";
+  if test "${1:-1}" = 0; then
+    echo "$MESSAGE";
   else
-    echo "${MESSAGE}" >&2;
+    echo "$MESSAGE" >&2;
   fi
-  exit ${1:-1};
+  exit "${1:-1}";
 }
 
 
 GETOPT_CMD="getopt -n $as_me -o heir -l help,exclude,in-place";
-GETOPT_CMD+=",regexp-extended -- ${@}";
-OPTIONS="`${GETOPT_CMD}`";
-OPTIONS_RSL=${?};
-if test "x${OPTIONS_RSL}" != x0; then
-  echo "getopt failed to parse: error code ${OPTIONS_RSL}" >&2;
-  exit ${OPTIONS_RSL};
+GETOPT_CMD="$GETOPT_CMD,regexp-extended -- $*";
+OPTIONS="$( $GETOPT_CMD; )";
+OPTIONS_RSL="$?";
+if test "$OPTIONS_RSL" != 0; then
+  echo "getopt failed to parse: error code $OPTIONS_RSL" >&2;
+  exit $OPTIONS_RSL;
 fi
-eval set -- "${OPTIONS}";
+eval set -- "$OPTIONS";
 
-EXCLUDE=no;
-INPLACE=no;
+EXCLUDE='';
+INPLACE='';
 
 SEDCMD="sed";
 
 while :
 do
-  case "${1}" in
+  case "$1" in
     -h|--help)
         usage 0;
         ;;
     -r|--regexp-extended)
-        SEDCMD+=" -r";
+        SEDCMD="$SEDCMD -r";
         ;;
     -e|--exclude)
-        EXCLUDE=yes;
+        EXCLUDE=':';
         ;;
     -i|--in-place)
-        SEDCMD+=" -i";
-        INPLACE=yes;
+        SEDCMD="$SEDCMD -i";
+        INPLACE=':';
         ;;
     --)
         shift;
         break;
         ;;
     *)
-        echo "Unexpected option: ${1}" >&2;
+        echo "Unexpected option: $1" >&2;
         usage;
         ;;
   esac
   shift;
 done
 
-if test ${#} -lt 1; then
+if test $# -lt 1; then
   echo "You must provide a pattern to match with" >&2;
   usage;
 fi
 
-PATTERN="${1}";
+PATTERN=$( echo "$1"|sed 's/\//\\\//g'; );
 shift;
 
-if test "x${INPLACE}" = "xyes" && test ${#} -lt 1; then
+if test "$INPLACE" && test $# -lt 1; then
   echo "You must provide a file name when using \`--in-place' option" >&2;
   exit 1;
 fi
 
-# You must use a `\' before using wonky delimiters like this.
-SEP=$'\x06';
-if test "x${EXCLUDE}" = xyes; then
-  eval "${SEDCMD} '\\${SEP}${PATTERN}${SEP},\$!d'";
+if test "$EXCLUDE"; then
+ $SEDCMD "/$PATTERN/,\$!d";
 else
-  eval "${SEDCMD} '1,\\${SEP}${PATTERN}${SEP}d';";
+  $SEDCMD "1,/$PATTERN/d";
 fi
