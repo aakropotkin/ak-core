@@ -1,2 +1,6 @@
 #! /usr/bin/env sh
-tr -s '\t' ' ' < "${1:-/dev/stdin}"|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
+: "${TR=tr}";
+: "${SED=sed}";
+$TR -s '\t' ' ' < "${1:-/dev/stdin}"  \
+  |$SED -e 's/^ \+//' -e 's/ \+$//'   \
+  |$TR ' ' '\n';
