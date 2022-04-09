@@ -31,9 +31,8 @@
 #                 This concatenates LINE1 with LINE2, dropping the '\'.
 # tx              Test if replacement was executed in the previous statement,
 #                 if it was then jump to the the line labeled "x".
-#                 This is necessary to "reset" the line counter which was
-#                 incremented by the statement "N" at the beginning of
-#                 this block.
+#                 This is necessary to "reset" the line counter to process the
+#                 newly appended contents.
 #                 If we did not reset, consecutive lines ending in '\' would
 #                 not be processed correctly.
 #                 See example below for details.
