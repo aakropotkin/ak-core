@@ -1,2 +1,2 @@
 #! /usr/bin/env sh
-cat ${1:--}|tr -s $'\t' ' '|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
+tr -s '\t' ' ' < "${1:-/dev/stdin}"|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
