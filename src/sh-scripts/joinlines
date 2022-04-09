@@ -1,2 +1,3 @@
 #! /usr/bin/env sh
-cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
+: "${SED=sed}";
+$SED ':x; /\\$/ { N; s/\\\n//; tx }' "${@:-/dev/stdin}";
