@@ -1,2 +1,6 @@
 #! /usr/bin/env sh
-ls /tmp/.X11-unix|tr 'X' ':';
+: "${FIND=find}";
+: "${SED=sed}";
+: "${X11_AF_DOMAIN_SOCKDIR=/tmp/.X11-unix}";
+$FIND $X11_AF_DOMAIN_SOCKDIR -mindepth 1 -maxdepth 2 -type s -print  \
+  |$SED 's/^.*\/X/:/';
