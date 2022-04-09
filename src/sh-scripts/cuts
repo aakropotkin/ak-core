@@ -5,7 +5,7 @@
 
 # ---------------------------------------------------------------------------- #
 
-function usage() {
+usage() {
 MESSAGE="\
 Usage: cuts OPTION... [FILE]
 Print selected parts of FILE to standard output.
@@ -29,7 +29,7 @@ Each range is one of:
 GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
 Full documentation <https://www.gnu.org/software/coreutils/cut>
 or available locally via: info '(coreutils) cut invocation'";
-  echo "${MESSAGE}";
+  echo "$MESSAGE";
 }
 
 
@@ -39,14 +39,14 @@ field=1;
 delims=' \t';
 
 while getopts hf:d: a; do
-  case "${a}" in
-    d)   delims="${OPTARG}"; ;;
-    f)   field="${OPTARG}";  ;;
-    h)   usage; exit 0;      ;;
-    [?]) usage >&2; exit 1;  ;;
+  case "$a" in
+    d) delims="$OPTARG"; ;;
+    f) field="$OPTARG";  ;;
+    h) usage; exit 0;      ;;
+    *) usage > /dev/stderr; exit 1;  ;;
   esac
 done
-shift $(( ${OPTIND} - 1 ));
+shift $(( OPTIND - 1 ));
 
 
 # ---------------------------------------------------------------------------- #
@@ -55,7 +55,7 @@ shift $(( ${OPTIND} - 1 ));
 # in actual inputs... because why would it?
 # `tr -s' "joins" repeated output characters, which in this case effectively
 # causes `cuts' to ignore empty fields.
-cat ${@:--}|tr -s "${delims}" $'\x06'|cut -d $'\x06' -f ${field};
+cat "${@:--}"|tr -s "$delims" '\06'|cut -d "$( printf '\x06'; )" -f "$field";
 
 
 # ---------------------------------------------------------------------------- #
