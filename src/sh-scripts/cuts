@@ -5,26 +5,32 @@
 #
 # ---------------------------------------------------------------------------- #
 
+set -euo pipefail;
+
+: "${SED=sed}";
 : "${CAT=cat}";
 : "${CUT=cut}";
 : "${TR=tr}";
 : "${PRINTF=printf}";
 : "${ECHO=echo}";
+: "${TEST=test}";
+: "${TRUE=:}";
 
+as_me="cuts";
 
 # ---------------------------------------------------------------------------- #
 
 usage() {
-MESSAGE="\
-Usage: cuts OPTION... [FILE]
+  $ECHO "\
+USAGE: $as_me OPTION... [FILE]
 Print selected parts of FILE to standard output.
 
 With no FILE, or when FILE is -, read standard input.
 
 Mandatory arguments to long options are mandatory for short options too.
-  -d, --delimiters=DELIMS   use DELIMS instead of TAB/SPACE for field delimiters
-  -f, --fields=LIST         select only these fields;  also print any line
-                            that contains no delimiter character.
+  -d   use DELIMS instead of TAB/SPACE for field delimiters
+  -f   select only these fields;  also print any line that contains no
+       delimiter character.
 Each LIST is made up of one range, or many ranges separated by commas.
 Selected input is written in the same order that it is read, and is written
 exactly once.
@@ -37,8 +43,8 @@ Each range is one of:
 
 GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
 Full documentation <https://www.gnu.org/software/coreutils/cut>
-or available locally via: info '(coreutils) cut invocation'";
-  $ECHO "$MESSAGE";
+or available locally via: info '(coreutils) cut invocation'
+";
 }
 
 
@@ -46,16 +52,32 @@ or available locally via: info '(coreutils) cut invocation'";
 
 field=1;
 delims=' \t';
+case "$*" in
+  *--help*) usage; exit 0;
+esac
 
-while getopts hf:d: a; do
-  case "$a" in
-    d) delims="$OPTARG"; ;;
-    f) field="$OPTARG";  ;;
-    h) usage; exit 0;      ;;
-    *) usage > /dev/stderr; exit 1;  ;;
+ARGS=$( getopt -o hf:d: -- "$@"; );
+RSL="$?";
+if $TEST "$RSL" != 0; then
+  $ECHO "Failed to parse arguments: $@" > /dev/stderr;
+  exit 1;
+fi
+
+eval set -- "$ARGS";
+while $TRUE; do
+  case "$1" in
+    -d)  shift; delims="$1"; ;;
+    -f)  shift; field="$1"; ;;
+    -h)  usage; exit 0; ;;
+    --)  shift; break;  ;;
+    *)
+      $ECHO "Unrecognized argument: $1" > /dev/stderr;
+      usage > /dev/stderr;
+      exit 1;
+    ;;
   esac
+  shift;
 done
-shift $(( OPTIND - 1 ));
 
 
 # ---------------------------------------------------------------------------- #
@@ -64,7 +86,9 @@ shift $(( OPTIND - 1 ));
 # in actual inputs... because why would it?
 # `tr -s' "joins" repeated output characters, which in this case effectively
 # causes `cuts' to ignore empty fields.
-$CAT "${@:--}"|$TR -s "$delims" '\06'|$CUT -d "$( printf '\x06'; )" -f "$field";
+$CAT "${@:-/dev/stdin}"                        \
+  |$TR -s "$delims" '\06'                      \
+  |$CUT -d "$( printf '\x06'; )" -f "$field";
 
 
 # ---------------------------------------------------------------------------- #
