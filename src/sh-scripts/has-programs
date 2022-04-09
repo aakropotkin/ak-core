@@ -13,17 +13,17 @@ set -euo pipefail;
 
 as_me="has-programs";
 
-: ${COMMAND="command"};
-: ${WHICH="$COMMAND $COMMAND -v"};
-: ${TEST="test"};
-: ${READLINK="readlink"};
-: ${PRINTF="printf"};
-: ${ECHO="$PRINTF %s\n"};
-: ${TRUE=":"};
+: "${COMMAND=command}";
+: "${WHICH=$COMMAND $COMMAND -v}";
+: "${TEST=test}";
+: "${READLINK=readlink}";
+: "${PRINTF=printf}";
+: "${ECHO=$PRINTF %s\n}";
+: "${TRUE=:}";
 
-: ${QUIET=0};
-: ${OUTPUT_YN=0};
-: ${IGNORE=0};
+: "${QUIET=}";
+: "${OUTPUT_YN=}";
+: "${IGNORE=}";
 
 
 # ---------------------------------------------------------------------------- #
@@ -50,17 +50,17 @@ OPTIONS
 while $TEST "$#" -gt 0; do
   case "$1" in
     -b|--yes-no)
-      OUTPUT_YN=1;
+      OUTPUT_YN="$TRUE";
     ;;
     -h|--help)
       usage;
       exit 0;
     ;;
     -q|--quiet)
-      QUIET=1;
+      QUIET="$TRUE";
     ;;
     -i|--ignore)
-      IGNORE=1;
+      IGNORE="$TRUE";
     ;;
     --)
       shift;
@@ -82,27 +82,27 @@ fi
 
 # ---------------------------------------------------------------------------- #
 
-function has_prog() {
-  $TEST -n "$( $WHICH $1; )";
+has_prog() {
+  $TEST -n "$( $WHICH "$1"; )";
 }
 
-function prog_path() {
-  $READLINK -f "$( $WHICH $1; )";
+prog_path() {
+  $READLINK -f "$( $WHICH "$1"; )";
 }
 
-function check_prog() {
+check_prog() {
   if has_prog "$1"; then
-    if $TEST "$OUTPUT_YN" = 0; then
-      $ECHO "$1: found at $( prog_path $1; )";
-    else
+    if $TEST "$OUTPUT_YN"; then
       $ECHO "$1: yes";
+    else
+      $ECHO "$1: found at $( prog_path "$1"; )";
     fi
     return 0;
   else
-    if $TEST "$OUTPUT_YN" = 0; then
-      $ECHO "$1: not found";
-    else
+    if $TEST "$OUTPUT_YN"; then
       $ECHO "$1: no";
+    else
+      $ECHO "$1: not found";
     fi
     return 1;
   fi
@@ -111,10 +111,10 @@ function check_prog() {
 
 # ---------------------------------------------------------------------------- #
 
-if $TEST "$QUIET" = 0; then
-  CHECK_CMD=check_prog;
-else
+if $TEST "$QUIET"; then
   CHECK_CMD=has_prog;
+else
+  CHECK_CMD=check_prog;
 fi
 
 NOT_FOUND=0;
@@ -126,10 +126,10 @@ while $TEST "$#" -gt 0; do
   shift;
 done
 
-if $TEST "$IGNORE" = 0; then
-  exit $NOT_FOUND;
-else
+if $TEST "$IGNORE"; then
   exit 0;
+else
+  exit $NOT_FOUND;
 fi
 
 
