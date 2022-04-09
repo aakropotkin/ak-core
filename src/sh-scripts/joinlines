@@ -1,3 +1,79 @@
 #! /usr/bin/env sh
+# ============================================================================ #
+#
+# Join lines ending in '\' together.
+# This is useful for "flattening" Makefiles and shell scripts.
+#
+# Limitations:
+#   - If you process a script containing HEREDOC syntax, it will will process
+#     the body of your HEREDOC like normal text.
+#   - Doesn't process Carriage Returns. Fuck Windows.
+#
+#
+# ---------------------------------------------------------------------------- #
+
 : "${SED=sed}";
+
+
+# ---------------------------------------------------------------------------- #
+
+# Breakdown of the sed command.
+# ;               Punctuate statements/commands.
+# :x              Create a label for the current line, so we can jump back to
+#                 it later.
+# /\\$/ { ... }   When we encounter a line ending in '\\', perform the routine
+#                 descibed in the block '{ ... }'.
+# N               Read a new line into the buffer, essentially "appending" it
+#                 to the previous line with a newline separator.
+#                 This is what allows us to perform regex replacement spanning
+#                 multiple lines.
+# s/\\\n//        Remove the first instance of '\<NEWLINE>' in the buffer.
+#                 This concatenates LINE1 with LINE2, dropping the '\'.
+# tx              Test if replacement was executed in the previous statement,
+#                 if it was then jump to the the line labeled "x".
+#                 This is necessary to "reset" the line counter which was
+#                 incremented by the statement "N" at the beginning of
+#                 this block.
+#                 If we did not reset, consecutive lines ending in '\' would
+#                 not be processed correctly.
+#                 See example below for details.
+#
+#
+# ---------------------------------------------------------------------------- #
+
 $SED ':x; /\\$/ { N; s/\\\n//; tx }' "${@:-/dev/stdin}";
+exit $?;
+
+
+# ---------------------------------------------------------------------------- #
+#
+# Example without use of 'tx' test ( BAD ).
+# $ cat greetings
+# hey \
+# there
+# 
+# hey \
+# there \
+# dude
+# 
+# hey \
+# there \
+# my \
+# dude
+#
+# $ sed ':x; /\\$/ { N; s/\\\n// }' greetings;
+# hey there                                  
+# 
+# hey there \
+# dude
+# 
+# hey there \
+# my dude
+#
+#
+# ---------------------------------------------------------------------------- #
+#
+#
+#
+# ============================================================================ #
+# vim: set filetype=sh :
