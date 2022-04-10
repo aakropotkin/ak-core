@@ -5,7 +5,7 @@
 #
 # ---------------------------------------------------------------------------- #
 
-set -euo pipefail;
+set -eu;
 
 : "${SED=sed}";
 : "${CAT=cat}";
@@ -59,7 +59,7 @@ esac
 ARGS=$( getopt -o hf:d: -- "$@"; );
 RSL="$?";
 if $TEST "$RSL" != 0; then
-  $ECHO "Failed to parse arguments: $@" > /dev/stderr;
+  $ECHO "Failed to parse arguments: $*" > /dev/stderr;
   exit 1;
 fi
 
