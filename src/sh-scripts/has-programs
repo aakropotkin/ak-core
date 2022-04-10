@@ -9,7 +9,7 @@
 #
 # ---------------------------------------------------------------------------- #
 
-set -euo pipefail;
+set -eu;
 
 as_me="has-programs";
 
@@ -28,7 +28,7 @@ as_me="has-programs";
 
 # ---------------------------------------------------------------------------- #
 
-function usage() {
+usage() {
   $ECHO "\
 Checks if programs are available in PATH.
   Prints \"PROG: found at PATH\" or \"PROG: not found\" by default.
