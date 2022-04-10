@@ -10,9 +10,9 @@ SNAME=cdeps;
 
 # ---------------------------------------------------------------------------- #
 
-function usage() {
-  USAGE_MESSAGE="\
-Usage: ${SNAME} [OPTION...] FILE [-- CFLAGS]
+usage() {
+  echo "\
+Usage: $SNAME [OPTION...] FILE [-- CFLAGS]
 Print header dependencies for C/C++ file.
 
 Options:
@@ -23,72 +23,65 @@ Options:
   -- CFLAGS      Any flags provided after \`--' are passed as compiler flags.
 
 Compiler tries \`CC' or \`CXX' if \`--cxx' was indicated, if unset these fall
-back to \`gcc' and \`g++' respectively.";
-
-
-  EXIT_STATUS=${1:-2};
-
-  if test ${EXIT_STATUS} = 0; then
-    echo "${USAGE_MESSAGE}";
-  else
-    echo "${USAGE_MESSAGE}" >&2;
-  fi
-
-  exit ${EXIT_STATUS};
+back to \`gcc' and \`g++' respectively.
+";
 }
 
 
 # ---------------------------------------------------------------------------- #
 
 # Option settings
-TARGET='';
-SYSDEPS=no;
-DO_CXX=no;
-DEFINES=no;
+TARGET=;
+SYSDEPS=;
+DO_CXX=;
+DEFINES=;
 
 
 # ---------------------------------------------------------------------------- #
 
 # Split options
 LONG_OPTS='-l help -l system -l cxx -l defines'
-OPTIONS="$( getopt -n ${SNAME} ${LONG_OPTS} -o 'shCD' -- ${@}; )";
-VALID_OPTIONS=${?};
+# FIXME: this assumes GNU implementation
+OPTIONS=$( getopt -n "$SNAME" "$LONG_OPTS" -o 'shCD' -- "$@"; );
+VALID_OPTIONS="$?";
 
-if test ${VALID_OPTIONS} != 0; then
-  echo "${SNAME}: encountered invalid options" >&2;
-  usage 2;
+if test "$VALID_OPTIONS" != 0; then
+  echo "$SNAME: encountered invalid options" > /dev/stderr;
+  usage > /dev/stderr;
+  exit 1;
 fi
 
 
 # Parse options
-eval set -- "${OPTIONS}";
-while :
-do
-  case ${1} in
+eval set -- "$OPTIONS";
+while :; do
+  case "$1" in
     -h|--help)
-      usage 0;
-      ;;
+      usage;
+      exit 0;
+    ;;
     -s|--system)
-      SYSDEPS=yes;
-      ;;
+      SYSDEPS=:;
+    ;;
     -C|--cxx)
-      DO_CXX=yes;
-      ;;
+      DO_CXX=:;
+    ;;
     -D|--defines)
-      DEFINES=yes;
-      ;;
+      DEFINES=:;
+    ;;
     --)
       shift;
       break;
-      ;;
+    ;;
     *)
-      if test -z ${TARGET}; then
-        TARGET="${1}";
+      if test -z "$TARGET"; then
+        TARGET="$1";
       else
-        echo "${SNAME}: unexpected option: ${1}" >&2;
-        usage 2;
+        echo "$SNAME: unexpected option: $1" > /dev/stderr;
+        usage > /dev/stderr;
+        exit 1;
       fi
-      ;;
+    ;;
   esac
   shift;
 done
@@ -96,62 +89,64 @@ done
 
 # ---------------------------------------------------------------------------- #
 
-if test -z "${TARGET}"; then
-  TARGET=${1};
+if test -z "$TARGET"; then
+  TARGET="$1";
   shift;
 fi
 
 # Strip off leading `./' or any other wonky pathname stuff that `CC -M' drops.
-TARGET="$( realpath --relative-to ${PWD} ${TARGET}; )";
+TARGET=$( realpath --relative-to "$PWD" "$TARGET"; );
 
 
 # Remaining args are considered compiler flags
-if test ${#} -gt 0; then
-  CFLAGS="${@}";
+if test "$#" -gt 0; then
+  CFLAGS="$*";
 fi
 
 
 # ---------------------------------------------------------------------------- #
 
-if test "x${SYSDEPS}" = "xyes"; then
-  CFLAGS+=" -M";
+if test "$SYSDEPS"; then
+  CFLAGS="${CFLAGS+$CFLAGS }-M";
 else
-  CFLAGS+=" -MM";
+  CFLAGS="${CFLAGS+$CFLAGS }-MM";
 fi
 
 
 # ---------------------------------------------------------------------------- #
 
 # Select compiler
-if test "x${DO_CXX}" = "xyes"; then
+if test "$DO_CXX"; then
   CC="${CXX:-$( which g++; )}";
 else
-  CC="${CC:-$( which gcc; )}";
+  : "${CC:=$( which gcc; )}";
 fi
 
 
 # ---------------------------------------------------------------------------- #
 
-function _getifnames() {
-  ifnames ${TARGET} 2>/dev/null|cut -d' ' -f1;
+_getifnames() {
+  ifnames "$TARGET" 2>/dev/null|cut -d' ' -f1;
 }
 
 
-function _joinlines() {
-  cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
+_joinlines() {
+  sed ':x; /\\$/ { N; s/\\\n//; tx }' /dev/stdin;
 }
 
-function _wslines() {
-  cat ${1:--}|tr -s $'\t' ' '|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
+_wslines() {
+  tr -s '\t' ' ' < /dev/stdin         \
+    |sed -e 's/^ \+//' -e 's/ \+$//'  \
+    |tr ' ' '\n';
 }
 
-function _getdeps() {
+_getdeps() {
   # Remove the target file and fake target.
   # Suppress debug output from CPP.
-  ${CC} -MT '' ${TARGET} ${CFLAGS}|sed -e 's/^: //';
+  $CC -MT '' "$TARGET" "$CFLAGS"|sed -e 's/^: //';
 }
 
-function _getdeps_post() {
+_getdeps_post() {
   _getdeps|_joinlines|_wslines|grep -v "^${TARGET#\.#\\\.}\$";
 }
 
@@ -161,11 +156,11 @@ function _getdeps_post() {
 # Scrape `#ifdef' symbols and set all of them to 1 using `-D<NAME>'.
 # This is far from exhaustive considering that combinations of these symbols
 # might be incompatible; but this covers a large number of use cases.
-if test "x${DEFINES}" = "xyes"; then
+if test "$DEFINES"; then
   # FIXME: Permutate over defines
   #CFLAGS_SAVED="${CFLAGS}";
   for d in $( _getifnames; ); do
-    CFLAGS+=" -D${d}";
+    CFLAGS="${CFLAGS+$CFLAGS }-D$d";
   done
 fi
 
