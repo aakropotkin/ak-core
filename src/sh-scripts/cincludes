@@ -5,75 +5,76 @@
 #
 # ---------------------------------------------------------------------------- #
 
-SNAME=cincludes;
+as_me=cincludes;
 
-function usage() {
+usage() {
   echo "\
-Usage: ${SNAME} FILE
+Usage: $as_me FILE
 
 Scrape \`#include' lines from file.
 
 This is similar to \`gcc -M ...' except that it will not recursively
 process \`#include' lines, it will not print any includes which may result
 from particular compilers, and will not be sensitive to \`#if(|def|ndef)'
-lines which may conditionally include other files.";
-
-  exit ${1};
+lines which may conditionally include other files.
+";
 }
 
 
 # ---------------------------------------------------------------------------- #
 
-if test "x${1}" = "x-h" || test "x${1}" = "x--help"; then
-  usage 0;
+if test "$1" = "-h" || test "$1" = "--help"; then
+  usage;
+  exit 0;
 fi
 
 if test ${#} != 1; then
-  usage 1 >&2;
-fi
-
-
-# ---------------------------------------------------------------------------- #
-
-TARGET=${1};
-shift;
-
-if ! test -r ${TARGET}; then
-  echo "${SNAME}: Cannot read file: ${TARGET}" >&2;
+  usage > /dev/stderr;
   exit 1;
 fi
 
 
 # ---------------------------------------------------------------------------- #
 
-function _joinlines() {
-  cat ${1:--}|sed ':x; /\\$/ { N; s/\\\n//; tx }';
+TARGET="$1";
+shift;
+
+if ! test -r "$TARGET"; then
+  echo "$as_me: Cannot read file: $TARGET" > /dev/stderr;
+  exit 1;
+fi
+
+
+# ---------------------------------------------------------------------------- #
+
+_joinlines() {
+  sed ':x; /\\$/ { N; s/\\\n//; tx }' "$1";
 }
 
-function _matchpp() {
-  cat ${1:--}|grep '^\s*\#\s*include\s*';
+_matchpp() {
+  grep '^\s*\#\s*include\s*' < /dev/stdin;
 }
 
-function _strippp() {
-  cat ${1:--}|sed 's:^\s*\#\s*include\s\+::';
+_strippp() {
+  sed 's:^\s*\#\s*include\s\+::' < /dev/stdin;
 }
 
-function _rmcomments() {
-  cat ${1:--}|sed -e 's:/\*.*?\*/::g' -e 's:/\*.*$::' -e 's://.*$::';
+_rmcomments() {
+  sed -e 's:/\*.*?\*/::g' -e 's:/\*.*$::' -e 's://.*$::' < /dev/stdin;
 }
 
-function _wslines() {
-  cat ${1:--}|tr -s $'\t' ' '|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
+_wslines() {
+  tr -s '\t' ' ' < /dev/stdin|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
 }
 
-function _getsymbols() {
-  cat ${1:--}|sed -e 's:^"\([^"]\+\)"$:\1:' -e 's:^<\([^"]\+\)>$:\1:';
+_getsymbols() {
+  sed -e 's:^"\([^"]\+\)"$:\1:' -e 's:^<\([^"]\+\)>$:\1:' < /dev/stdin;
 }
 
 
 # ---------------------------------------------------------------------------- #
 
-_joinlines ${TARGET}|_matchpp|_strippp|_rmcomments|_wslines|_getsymbols;
+_joinlines "$TARGET"|_matchpp|_strippp|_rmcomments|_wslines|_getsymbols;
 
 
 # ---------------------------------------------------------------------------- #
