@@ -1,4 +1,4 @@
 #! /usr/bin/env sh
 
 # Only works for GCC currently.
-objdump -w -x ${1}|grep -o 'gnu_cxx[0-9]\+'|sort -u;
+objdump -w -x "$1"|grep -o 'gnu_cxx[0-9]\+'|sort -u;
