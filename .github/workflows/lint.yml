@@ -14,9 +14,10 @@ jobs:
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
     - run: |
         set -eu
-        nix develop --impure
+        exec nix develop --impure <<EOF
         unpackPhase
         cd $sourceRoot
         patchPhase
         configurePhase
         make -C src/sh-scripts/test check-local
+        EOF
