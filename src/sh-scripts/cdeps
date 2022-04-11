@@ -5,14 +5,14 @@
 
 # ---------------------------------------------------------------------------- #
 
-SNAME=cdeps;
+as_me=cdeps;
 
 
 # ---------------------------------------------------------------------------- #
 
 usage() {
   echo "\
-Usage: $SNAME [OPTION...] FILE [-- CFLAGS]
+Usage: $as_me [OPTION...] FILE [-- CFLAGS]
 Print header dependencies for C/C++ file.
 
 Options:
@@ -42,11 +42,11 @@ DEFINES=;
 # Split options
 LONG_OPTS='-l help -l system -l cxx -l defines'
 # FIXME: this assumes GNU implementation
-OPTIONS=$( getopt -n "$SNAME" "$LONG_OPTS" -o 'shCD' -- "$@"; );
+OPTIONS=$( getopt -n "$as_me" "$LONG_OPTS" -o 'shCD' -- "$@"; );
 VALID_OPTIONS="$?";
 
 if test "$VALID_OPTIONS" != 0; then
-  echo "$SNAME: encountered invalid options" > /dev/stderr;
+  echo "$as_me: encountered invalid options" > /dev/stderr;
   usage > /dev/stderr;
   exit 1;
 fi
@@ -77,7 +77,7 @@ while :; do
       if test -z "$TARGET"; then
         TARGET="$1";
       else
-        echo "$SNAME: unexpected option: $1" > /dev/stderr;
+        echo "$as_me: unexpected option: $1" > /dev/stderr;
         usage > /dev/stderr;
         exit 1;
       fi

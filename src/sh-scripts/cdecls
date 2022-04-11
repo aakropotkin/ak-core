@@ -6,13 +6,16 @@
 # ---------------------------------------------------------------------------- #
 
 as_me=cdecls;
+if test "$ZSH_VERSION"; then
+  chpwd() { :; }
+fi
 
 
 # ---------------------------------------------------------------------------- #
 
-function usage() {
-  USAGE_MESSAGE="\
-Usage: ${as_me} [OPTION...] FILE [-- CFLAGS]
+usage() {
+  echo "\
+Usage: $as_me [OPTION...] FILE [-- CFLAGS]
 Print declarations for C/C++ file.
 
 Options:
@@ -22,68 +25,59 @@ Options:
   -- CFLAGS      Any flags provided after \`--' are passed as compiler flags.
 
 Compiler tries \`CC' or \`CXX' if \`--cxx' was indicated, if unset these fall
-back to \`gcc' and \`g++' respectively.";
-
-
-  EXIT_STATUS=${1:-2};
-
-  if test ${EXIT_STATUS} = 0; then
-    echo "${USAGE_MESSAGE}";
-  else
-    echo "${USAGE_MESSAGE}" >&2;
-  fi
-
-  exit ${EXIT_STATUS};
+back to \`gcc' and \`g++' respectively.
+";
 }
 
 
 # ---------------------------------------------------------------------------- #
 
 # Option settings
-TARGET='';
-DO_CXX=no;
-DEFINES=no;
+TARGET=;
+DO_CXX=;
+DEFINES=;
 
 
 # ---------------------------------------------------------------------------- #
 
 # Split options
 LONG_OPTS='-l help -l cxx -l defines'
-OPTIONS="$( getopt -n ${as_me} ${LONG_OPTS} -o 'hCD' -- ${@}; )";
-VALID_OPTIONS=${?};
+OPTIONS=$( getopt -n "$as_me" "$LONG_OPTS" -o 'hCD' -- "$@"; );
+VALID_OPTIONS="$?";
 
-if test ${VALID_OPTIONS} != 0; then
-  echo "${as_me}: encountered invalid options" >&2;
-  usage 2;
+if test "$VALID_OPTIONS" != 0; then
+  echo "$as_me: encountered invalid options" > /dev/stderr;
+  usage > /dev/stderr;
+  exit 1;
 fi
 
 
 # Parse options
-eval set -- "${OPTIONS}";
-while :
-do
-  case ${1} in
+eval set -- "$OPTIONS";
+while :; do
+  case "$1" in
     -h|--help)
       usage 0;
-      ;;
+    ;;
     -C|--cxx)
-      DO_CXX=yes;
-      ;;
+      DO_CXX=:;
+    ;;
     -D|--defines)
-      DEFINES=yes;
-      ;;
+      DEFINES=:;
+    ;;
     --)
       shift;
       break;
-      ;;
+    ;;
     *)
-      if test -z ${TARGET}; then
-        TARGET="${1}";
+      if test -z "$TARGET"; then
+        TARGET="$1";
       else
-        echo "${as_me}: unexpected option: ${1}" >&2;
-        usage 2;
+        echo "$as_me: unexpected option: $1" > /dev/stderr;
+        usage > /dev/stderr;
+        exit 1;
       fi
-      ;;
+    ;;
   esac
   shift;
 done
@@ -91,45 +85,45 @@ done
 
 # ---------------------------------------------------------------------------- #
 
-if test -z "${TARGET}"; then
-  TARGET=${1};
+if test -z "$TARGET"; then
+  TARGET="$1";
   shift;
 fi
 
-TARGET="$( readlink -f ${TARGET}; )";
+TARGET=$( readlink -f "$TARGET"; );
 
 
 # Remaining args are considered compiler flags
-if test ${#} -gt 0; then
-  CFLAGS="${@}";
+if test "$#" -gt 0; then
+  CFLAGS="$*";
 fi
 
 
 # ---------------------------------------------------------------------------- #
 
 # Select compiler
-if test "x${DO_CXX}" = "xyes"; then
+if test "$DO_CXX"; then
   CC="${CXX:-$( which g++; )}";
 else
-  CC="${CC:-$( which gcc; )}";
+  : "${CC:=$( which gcc; )}";
 fi
 
 
 # ---------------------------------------------------------------------------- #
 
-function _getifnames() {
-  ifnames ${TARGET} 2>/dev/null|cut -d' ' -f1;
+_getifnames() {
+  ifnames "$TARGET"|cut -d' ' -f1 2 > /dev/null;
 }
 
 
 # Scrape `#ifdef' symbols and set all of them to 1 using `-D<NAME>'.
 # This is far from exhaustive considering that combinations of these symbols
 # might be incompatible; but this covers a large number of use cases.
-if test "x${DEFINES}" = "xyes"; then
+if test "$DEFINES"; then
   # FIXME: Permutate over defines
   #CFLAGS_SAVED="${CFLAGS}";
   for d in $( _getifnames; ); do
-    CFLAGS+=" -D${d}";
+    CFLAGS="${CFLAGS+$CFLAGS }-D$d";
   done
 fi
 
@@ -139,31 +133,33 @@ fi
 # Make a temporary directory, and cd to it.
 # Running the ADA spec generator often creates more files than the one targeted,
 # so it's easier just to wipe out the directory.
-TD=$( mktemp -dt ${as_me}-XXXXXX; );
-trap "cd - 2>&1 1>/dev/null; rm -rf ${TD}; exit 1;" 1 2 3 13 15;
-cd ${TD};
+TD=$( mktemp -dt "$as_me-XXXXXX"; );
+ODIR="$PWD";
+trap 'cd "$ODIR"; rm -rf "$TD"; exit 1;' 1 2 3 15;
+cd "$TD"||exit;
 
 
 # ---------------------------------------------------------------------------- #
 
-cat ${TARGET} > spec.c;
-${CC} -c -fdump-ada-spec spec.c;
+cat "$TARGET" > spec.c;
+$CC -c -fdump-ada-spec spec.c;
 
 if ! test -r spec_c.ads; then
-  echo "Failed to produce ADA Spec File" >&2;
-  cd - 2>&1 1>/dev/null;
-  rm -rf ${TD};
+  echo "Failed to produce ADA Spec File" > /dev/stderr;
+  cd "$ODIR"||exit;
+  rm -rf "$TD";
   exit 1;
 fi
 
-cat spec_c.ads|grep 'External_Name'|cut -d'"' -f2;
+grep 'External_Name' spec_c.ads|cut -d'"' -f2;
 
 
 # ---------------------------------------------------------------------------- #
 
 # Cleanup
-cd - 2>&1 1>/dev/null;
-rm -rf ${TD};
+cd "$ODIR"||exit;
+rm -rf "$TD";
+exit 0;
 
 
 # ---------------------------------------------------------------------------- #
