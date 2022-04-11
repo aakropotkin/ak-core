@@ -1,5 +1,6 @@
 #! /usr/bin/env sh
-export PATH=$( realpath -s ..; ):$PATH;
+scriptdir="$( realpath -s ..; )";
+export PATH="$scriptdir${PATH+:$PATH}";
 SCRIPT=is-elf-cu;
 for obj in hello.o howdy.o greet.o; do
   test -f $obj || echo "can't find $obj";
