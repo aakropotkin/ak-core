@@ -1,0 +1,17 @@
+name: AK-Core Lint
+on:
+  pull_request:
+  push:
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: cachix/install-nix-action@v16
+      with:
+        extra_nix_config: |
+          experimental-features = nix-command flakes
+          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+    - run: nix develop --impure
+    - run: unpackPhase && cd $sourceRoot && patchPhase && configurePhase
+    - run: make -C src/sh-scripts/test check-local
