@@ -525,10 +525,8 @@ check_SCRIPTS = ../is-elf-cu ../cdeps test-is-elf-cu.sh test-cdeps.sh \
 TESTS = test-is-elf-cu.sh test-cdeps.sh test-gen-la.sh
 check_DATA = hello.o howdy.o greet.o libgreet.la cdeps-a.h cdeps-b.h \
 	cdeps-c.h cdeps-a.c cdeps-c.c
-@ENABLE_SHELLCHECK_TRUE@PARENT_SHELLCHECK_FILES = 
-@ENABLE_SHELLCHECK_TRUE@SHELLCHECK_FILES = $(PARENT_SHELLCHECK_FILES) \
-@ENABLE_SHELLCHECK_TRUE@	test-cdeps.sh test-is-elf-cu.sh \
-@ENABLE_SHELLCHECK_TRUE@	test-gen-la.sh
+@ENABLE_SHELLCHECK_TRUE@SHELLCHECK_FILES = test-cdeps.sh \
+@ENABLE_SHELLCHECK_TRUE@	test-is-elf-cu.sh test-gen-la.sh
 @ENABLE_SHELLCHECK_TRUE@SHELLCHECK_FLAGS = --shell=sh
 all: all-am
 
@@ -1045,7 +1043,7 @@ libgreet_paths: libgreet.la
 	$(MAKE) -C $(builddir)/.. is-elf-cu
 
 # check-am assures that all test scripts and other resources are built.
-@ENABLE_SHELLCHECK_TRUE@check-local: check-am
+@ENABLE_SHELLCHECK_TRUE@check-local: $(SHELLCHECK_FILES)
 @ENABLE_SHELLCHECK_TRUE@	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_FILES)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -5,16 +5,16 @@ scriptdir="$( realpath -s "$srcdir/.."; )";
 export PATH="$scriptdir${PATH+:$PATH}";
 SCRIPT=gen-la;
 
-have_deps=yes;
-test -d ./.libs || have_deps=no;
-test -f ./libgreet.la || have_deps=no;
-test -f ./.libs/libgreet.la || have_deps=no;
-test -f ./.libs/libgreet.so || have_deps=no;
-test -f ./.libs/libgreet.so.0 || have_deps=no;
-test -f ./.libs/libgreet.so.0.0.0 || have_deps=no;
-test -f ./.libs/libgreet.a || have_deps=no;
+have_deps=:;
+test -d ./.libs || have_deps=;
+test -f ./libgreet.la || have_deps=;
+test -f ./.libs/libgreet.la || have_deps=;
+test -f ./.libs/libgreet.so || have_deps=;
+test -f ./.libs/libgreet.so.0 || have_deps=;
+test -f ./.libs/libgreet.so.0.0.0 || have_deps=;
+test -f ./.libs/libgreet.a || have_deps=;
 
-if test "x${have_deps}" != "xyes"; then
+if test "$have_deps"; then
   echo "$SCRIPT: depends on $PWD/libgreet.la and $PWD/test/.libs/"  \
        > /dev/stderr;
   exit 1;

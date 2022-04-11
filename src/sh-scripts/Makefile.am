@@ -47,3 +47,11 @@ $(IS_ELF_TARGETS): %: is-elf-xx.m4sh
 
 $(M4SH_TARGETS): $(addprefix $(M4SUGAR_DIR)/,elf.m4 util.m4)
 $(IS_ELF_TARGETS): $(M4SUGAR_DIR)/pred-scripts.m4
+
+if ENABLE_SHELLCHECK
+SHELLCHECK_FILES = $(bin_SCRIPTS)
+SHELLCHECK_FLAGS = --shell=sh
+# check-am assures that all test scripts and other resources are built.
+check-local: $(SHELLCHECK_FILES)
+	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_FILES)
+endif

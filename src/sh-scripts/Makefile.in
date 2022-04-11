@@ -352,6 +352,8 @@ SUBDIRS = test
 M4SUGAR_DIR = $(top_srcdir)/src/m4sugar
 AUTOM4TE_FLAGS = -I$(M4SUGAR_DIR) -l m4sh
 BUILT_SOURCES = soname.in needs.in
+@ENABLE_SHELLCHECK_TRUE@SHELLCHECK_FILES = $(bin_SCRIPTS)
+@ENABLE_SHELLCHECK_TRUE@SHELLCHECK_FLAGS = --shell=sh
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -583,7 +585,9 @@ distdir-am: $(DISTFILES)
 	      || exit 1; \
 	  fi; \
 	done
+@ENABLE_SHELLCHECK_FALSE@check-local:
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
 all-am: Makefile $(SCRIPTS)
@@ -692,22 +696,22 @@ ps-am:
 
 uninstall-am: uninstall-binSCRIPTS
 
-.MAKE: $(am__recursive_targets) all check install install-am \
+.MAKE: $(am__recursive_targets) all check check-am install install-am \
 	install-exec install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
-	check-am clean clean-generic clean-libtool cscopelist-am ctags \
-	ctags-am distclean distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binSCRIPTS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs installdirs-am maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
-	uninstall-am uninstall-binSCRIPTS
+	check-am check-local clean clean-generic clean-libtool \
+	cscopelist-am ctags ctags-am distclean distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binSCRIPTS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs installdirs-am \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-binSCRIPTS
 
 .PRECIOUS: Makefile
 
@@ -738,6 +742,10 @@ $(IS_ELF_TARGETS): %: is-elf-xx.m4sh
 
 $(M4SH_TARGETS): $(addprefix $(M4SUGAR_DIR)/,elf.m4 util.m4)
 $(IS_ELF_TARGETS): $(M4SUGAR_DIR)/pred-scripts.m4
+
+# check-am assures that all test scripts and other resources are built.
+@ENABLE_SHELLCHECK_TRUE@check-local: $(SHELLCHECK_FILES)
+@ENABLE_SHELLCHECK_TRUE@	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_FILES)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

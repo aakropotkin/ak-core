@@ -37,8 +37,7 @@ check_SCRIPTS += ../gen-la test-gen-la.sh
 TESTS += test-gen-la.sh
 
 if ENABLE_SHELLCHECK
-PARENT_SHELLCHECK_FILES =
-SHELLCHECK_FILES =  $(PARENT_SHELLCHECK_FILES)
+SHELLCHECK_FILES =
 SHELLCHECK_FILES += test-cdeps.sh
 SHELLCHECK_FILES += test-is-elf-cu.sh
 SHELLCHECK_FILES += test-gen-la.sh
@@ -46,6 +45,6 @@ SHELLCHECK_FILES += test-gen-la.sh
 SHELLCHECK_FLAGS = --shell=sh
 
 # check-am assures that all test scripts and other resources are built.
-check-local: check-am
+check-local: $(SHELLCHECK_FILES)
 	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_FILES)
 endif
