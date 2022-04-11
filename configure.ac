@@ -27,7 +27,12 @@ AC_PROG_GREP
 AC_PROG_SED
 AC_PROG_AUTOM4TE
 
+AS_VAR_SET_IF([SHELLCHECK], [],
+  [AS_VAR_SET([SHELLCHECK], ["`command -v shellcheck`"])])
+AK_PROG_SHELLCHECK
+
 AC_SUBST([lt_obj_subdir], ["$lt_cv_objdir"])
+
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile
