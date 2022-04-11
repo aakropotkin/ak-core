@@ -12,12 +12,5 @@ jobs:
         extra_nix_config: |
           experimental-features = nix-command flakes
           access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-    - run: |
-        set -eu
-        exec nix develop --impure <<EOF
-        unpackPhase
-        cd $sourceRoot
-        patchPhase
-        configurePhase
-        make -C src/sh-scripts/test check-local
-        EOF
+    - run: nix develop --impure --configure
+    - run: cd *-source && make -C src/sh-scripts check-local
