@@ -6,9 +6,7 @@
 # ---------------------------------------------------------------------------- #
 
 as_me=cdecls;
-if test "$ZSH_VERSION"; then
-  chpwd() { :; }
-fi
+: "${CD=cd${ZSH_VERSION+ -q}}";
 
 
 # ---------------------------------------------------------------------------- #
@@ -135,8 +133,8 @@ fi
 # so it's easier just to wipe out the directory.
 TD=$( mktemp -dt "$as_me-XXXXXX"; );
 ODIR="$PWD";
-trap 'cd "$ODIR"; rm -rf "$TD"; exit 1;' 1 2 3 15;
-cd "$TD"||exit;
+trap '$CD "$ODIR"; rm -rf "$TD"; exit 1;' EXIT HUP TERM INT;
+$CD "$TD"||exit;
 
 
 # ---------------------------------------------------------------------------- #
@@ -146,7 +144,7 @@ $CC -c -fdump-ada-spec spec.c;
 
 if ! test -r spec_c.ads; then
   echo "Failed to produce ADA Spec File" > /dev/stderr;
-  cd "$ODIR"||exit;
+  $CD "$ODIR"||exit;
   rm -rf "$TD";
   exit 1;
 fi
@@ -157,7 +155,7 @@ grep 'External_Name' spec_c.ads|cut -d'"' -f2;
 # ---------------------------------------------------------------------------- #
 
 # Cleanup
-cd "$ODIR"||exit;
+$CD "$ODIR"||exit;
 rm -rf "$TD";
 exit 0;
 
