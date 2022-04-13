@@ -18056,7 +18056,7 @@ lt_obj_subdir="$lt_cv_objdir"
 
 
 
-ac_config_files="$ac_config_files Makefile src/Makefile src/m4sugar/Makefile src/m4sugar/test/Makefile src/sh-scripts/Makefile src/sh-scripts/test/Makefile src/zsh-scripts/Makefile src/awk-scripts/Makefile src/jq/Makefile"
+ac_config_files="$ac_config_files Makefile src/Makefile src/m4sugar/Makefile src/m4sugar/test/Makefile src/sh-scripts/Makefile src/sh-scripts/test/Makefile src/zsh-scripts/Makefile src/awk-scripts/Makefile src/jq/Makefile doc/sh-scripts/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -19198,6 +19198,7 @@ do
     "src/zsh-scripts/Makefile") CONFIG_FILES="$CONFIG_FILES src/zsh-scripts/Makefile" ;;
     "src/awk-scripts/Makefile") CONFIG_FILES="$CONFIG_FILES src/awk-scripts/Makefile" ;;
     "src/jq/Makefile") CONFIG_FILES="$CONFIG_FILES src/jq/Makefile" ;;
+    "doc/sh-scripts/Makefile") CONFIG_FILES="$CONFIG_FILES doc/sh-scripts/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

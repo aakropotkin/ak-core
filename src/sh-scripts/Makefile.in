@@ -742,7 +742,6 @@ $(IS_ELF_TARGETS): %: is-elf-xx.m4sh
 
 $(M4SH_TARGETS): $(addprefix $(M4SUGAR_DIR)/,elf.m4 util.m4)
 $(IS_ELF_TARGETS): $(M4SUGAR_DIR)/pred-scripts.m4
-
 # check-am assures that all test scripts and other resources are built.
 @ENABLE_SHELLCHECK_TRUE@check-local: $(SHELLCHECK_FILES)
 @ENABLE_SHELLCHECK_TRUE@	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_FILES)
