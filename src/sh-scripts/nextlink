@@ -1,0 +1,76 @@
+#! /usr/bin/env sh
+
+as_me="nextlink";
+
+_next_symlink() {
+  test -L "$1" && stat -c '%N' "$1"|sed "s/.*-> '\([^']*\)'$/\1/";
+}
+
+_last_symlink() {
+  test -L "$1" && readlink -f "$1";
+}
+
+_iterate_symlinks() {
+  test -L "$1" || return;
+  local last="$( _last_symlink "$1"; )";
+  local curr="$1";
+  #echo "$curr";
+  until test "$curr" = "$last"; do
+    local next="$( _next_symlink "$curr"; )";
+    curr="$next";
+    echo "$curr";
+  done
+}
+
+TARGET=;
+NFOLLOWS=1;
+ALL=;
+INCLUDE=;
+
+ORIG_ARGS=( "$@" );
+parse_fail() {
+  if test "$#" -lt 1; then
+    echo "$as_me: Failed to parse arguments: ${ORIG_ARGS[*]}" > /dev/stderr;
+  else
+    echo "$as_me: Failed to parse argument: $1" > /dev/stderr;
+  fi
+  exit 1;
+}
+
+usage() {
+  echo "$as_me [(-h|--help)|(-a|--all)|-n] FILE";
+  echo "  Follow a symlink N times, defaults to 1.";
+  echo "  Use -a,--all to print every link in the chain.";
+}
+
+while :; do
+  case "$1" in
+    -h|--help) usage; exit 0; ;;
+    -n=*) NFOLLOWS="${1#-n=}"; ;;
+    -n*)  NFOLLOWS="${1#-n}";  ;;
+    -n)   NFOLLOWS="${2?}"; shift; ;;
+    -i)   INCLUDE=:; ;;
+    -ia|-ai) INCLUDE=:; ALL=:; ;;
+    -a|--all) ALL=:; ;;
+    --)   shift; break; ;;
+    *)
+      test ! -e "$1" && { echo "$as_me: No such file: $1"  > /dev/stderr; exit 1; };
+      test ! -L "$1" && { echo "$as_me: Not a symlink: $1" > /dev/stderr; exit 1; };
+      TARGET="$1";
+      shift;
+      break;
+    ;;
+  esac
+  shift;
+done
+test -z "$TARGET" && { TARGET="${1?}"; shift; }
+test "$#" -gt 0 && { echo "$as_me: Too many arguments: $*" > /dev/stderr; exit 1; };
+
+test "$INCLUDE" && echo "$TARGET";
+if test "$ALL"; then
+  _iterate_symlinks "$TARGET";
+else
+  for i in $( seq 1 "$NFOLLOWS"; ); do
+    _next_symlink "$TARGET"||exit 0;
+  done
+fi
