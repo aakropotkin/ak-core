@@ -12,7 +12,7 @@
     in {
       packages = eachDefaultSystemMap ( system: rec {
         ak-core =
-          ( import nixpkgs { inherit system;} ).callPackage ./default.nix {};
+          ( import nixpkgs { inherit system; } ).callPackage ./default.nix {};
         default = ak-core;
       } );
 
@@ -22,7 +22,7 @@
       overlays.default = self.overlays.ak-core;
 
       nixosModules.ak-core = { ... }: {
-        nixpkgs.overlays = builtins.attrValues self.overlays;
+        nixpkgs.overlays = self.overlays.ak-core;
       };
       nixosModule = self.nixosModules.ak-core;
     };
