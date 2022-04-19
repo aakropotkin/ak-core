@@ -1,0 +1,22 @@
+#! /usr/bin/env sh
+# Print JSON with `{ "INTERFACE": "LAN IP", ... }' fields.
+# jq is optional, if it's not in PATH the output is just uglier, but valid JSON.
+: "${GREP=grep}";
+: "${IFCONFIG=ifconfig}";
+: "${JQ=jq}";
+: "${SED=sed}";
+_iface_ips_json() {
+  printf '{';
+  $IFCONFIG  \
+    |$SED -e 's/^\([[:alnum:]]\{1,\}\):/"\1":\n /'                 \
+    |$GREP -v '\s\+flags='                                         \
+    |$GREP -B1 '\s\+inet '                                         \
+    |$SED -e 's/\s\{1,\}inet[[:space:]]\([0-9.]\{1,\}\).*$/"\1"/'  \
+          -e 's/--/,/';
+  printf '}';
+}
+if test -n "command command -v $JQ"; then
+  _iface_ips_json|$JQ;
+else
+  _iface_ips_json;
+fi

@@ -1,10 +1,7 @@
 {
   description = "A handful of useful core utilities and scripts for Linux";
 
-  inputs = {
-    nixpkgs.url = github:NixOS/nixpkgs/nixpkgs-unstable;
-    utils.url   = github:numtide/flake-utils;
-  };
+  inputs.utils.url = github:numtide/flake-utils;
 
   outputs = { self, nixpkgs, utils }:
     let
