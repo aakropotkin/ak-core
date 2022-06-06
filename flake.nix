@@ -4,23 +4,21 @@
   inputs.utils.url = github:numtide/flake-utils;
 
   outputs = { self, nixpkgs, utils }:
-    let
-      eachDefaultSystemMap = utils.lib.eachSystemMap utils.lib.defaultSystems;
+    let inherit (utils.lib) eachDefaultSystemMap;
     in {
-      packages = eachDefaultSystemMap ( system: rec {
-        ak-core =
-          ( import nixpkgs { inherit system; } ).callPackage ./default.nix {};
-        default = ak-core;
+      packages = eachDefaultSystemMap ( system: {
+        ak-core = nixpkgs.legacyPackages.${system}.callPackage ./. {};
+        default = self.packages.${system}.ak-core;
       } );
 
       overlays.ak-core = final: prev: {
-        inherit (self.packages.${final.system}) ak-core;
+        ak-core = nixpkgs.legacyPackages.${final.system}.callPackage ./. {};
       };
       overlays.default = self.overlays.ak-core;
 
       nixosModules.ak-core = { ... }: {
         nixpkgs.overlays = self.overlays.ak-core;
       };
-      nixosModule = self.nixosModules.ak-core;
+      nixosModules.default = self.nixosModules.ak-core;
     };
 }
