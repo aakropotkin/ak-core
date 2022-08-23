@@ -7,9 +7,9 @@
 : "${XARGS:=xargs}";
 : "${SORT:=sort}";
 $SHA256SUM <(
-  printf '%s' $( $FIND package -type f -print  \
-                  |$SORT                       \
-                  |$XARGS $SHA256SUM -b        \
+  printf '%s' $( $FIND "$DIR" -type f -print  \
+                  |$SORT                      \
+                  |$XARGS $SHA256SUM -b       \
                   |$CUT -d' ' -f1;
                )
 )|$CUT -d' ' -f1;
