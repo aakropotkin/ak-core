@@ -1,0 +1,15 @@
+#! /usr/bin/env bash
+# USAGE: sha256dir [DIR]
+: "${DIR:=$PWD}";
+: "${SHA256SUM:=sha256sum}";
+: "${CUT:=cut}";
+: "${FIND:=find}";
+: "${XARGS:=xargs}";
+: "${SORT:=sort}";
+$SHA256SUM <(
+  printf '%s' $( $FIND package -type f -print  \
+                  |$SORT                       \
+                  |$XARGS $SHA256SUM -b        \
+                  |$CUT -d' ' -f1;
+               )
+)|$CUT -d' ' -f1;
