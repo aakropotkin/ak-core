@@ -1,15 +1,19 @@
 #! /usr/bin/env bash
+# Create a SHA256 ( base16 ) checksum of a directory.
+# This process is reproducible/deterministic.
+# This is identical to Nix's `narHash' calculation.
 # USAGE: sha256dir [DIR]
-: "${DIR:=$PWD}";
+DIR="${1:-$PWD}";
 : "${SHA256SUM:=sha256sum}";
 : "${CUT:=cut}";
 : "${FIND:=find}";
 : "${XARGS:=xargs}";
 : "${SORT:=sort}";
-$SHA256SUM <(
-  printf '%s' $( $FIND "$DIR" -type f -print  \
-                  |$SORT                      \
-                  |$XARGS $SHA256SUM -b       \
-                  |$CUT -d' ' -f1;
-               )
-)|$CUT -d' ' -f1;
+: "${PRINTF:=printf}";
+$FIND "$DIR" -type f -print  \
+  |$SORT                     \
+  |$XARGS $SHA256SUM -b      \
+  |$CUT -d' ' -f1            \
+  |$XARGS printf '%s'        \
+  |$SHA256SUM                \
+  |$CUT -d' ' -f1;
