@@ -3,7 +3,7 @@ bin_SCRIPTS =  cuts displays joinlines lorder wsmerge json-syms
 bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames get-m4-path get-m4-files
 bin_SCRIPTS += drop-until cdecls gen-la lines-prefix racu
 bin_SCRIPTS += elf-cflags symlink-samedir-p has-programs nextlink
-bin_SCRIPTS += iface_ips_json
+bin_SCRIPTS += iface_ips_json sha256dir
 
 # M4SH generated scripts
 IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
