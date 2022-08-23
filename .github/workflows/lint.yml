@@ -1,4 +1,5 @@
 name: AK-Core Lint
+
 on:
   pull_request:
   push:
@@ -8,14 +9,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tests:
+  shellcheck:
+    defaults:
+      run:
+        shell: bash
+    name: Shellcheck
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: cachix/install-nix-action@v16
-      with:
-        extra_nix_config: |
-          experimental-features = nix-command flakes
-          access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-    - run: nix develop --impure --configure
-    - run: nix shell nixpkgs#autoconf nixpkgs#automake nixpkgs#libtool nixpkgs#shellcheck -c 'make -C src/sh-scripts check-local'
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v16
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+      - name: Run Shellcheck
+        run: |
+          nix profile install   \
+            nixpkgs#autoconf    \
+            nixpkgs#automake    \
+            nixpkgs#libtool     \
+            nixpkgs#shellcheck  \
+            nixpkgs#gnumake     \
+            nixpkgs#gawk        \
+            nixpkgs#findutils   \
+            nixpkgs#coreutils   \
+            nixpkgs#gnused      \
+            nixpkgs#file        \
+            nixpkgs#bash        \
+          ;
+          ./bootstrap.sh;
+          ./configure --enable-shellcheck;
+          cd src/sh-scripts;
+          make check-local;
