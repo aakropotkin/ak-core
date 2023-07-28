@@ -33,14 +33,10 @@ check_DATA =  hello.o howdy.o greet.o libgreet.la
 check_DATA += cdeps-a.h cdeps-b.h cdeps-c.h cdeps-a.c cdeps-c.c
 
 
-check_SCRIPTS += ../gen-la test-gen-la.sh
-TESTS += test-gen-la.sh
-
 if ENABLE_SHELLCHECK
 SHELLCHECK_FILES =
 SHELLCHECK_FILES += test-cdeps.sh
 SHELLCHECK_FILES += test-is-elf-cu.sh
-SHELLCHECK_FILES += test-gen-la.sh
 
 SHELLCHECK_FLAGS = --shell=sh
 

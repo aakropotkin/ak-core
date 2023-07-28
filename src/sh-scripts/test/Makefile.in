@@ -416,6 +416,7 @@ EGREP = @EGREP@
 ETAGS = @ETAGS@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GREP = @GREP@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
@@ -520,13 +521,12 @@ greet_SOURCES = greet.c
 greet_LDADD = libgreet.la
 libgreet_so_PATH = $(abs_builddir)/$(lt_obj_subdir)/libgreet.so
 libgreet_a_PATH = $(abs_builddir)/$(lt_obj_subdir)/libgreet.a
-check_SCRIPTS = ../is-elf-cu ../cdeps test-is-elf-cu.sh test-cdeps.sh \
-	../gen-la test-gen-la.sh
-TESTS = test-is-elf-cu.sh test-cdeps.sh test-gen-la.sh
+check_SCRIPTS = ../is-elf-cu ../cdeps test-is-elf-cu.sh test-cdeps.sh
+TESTS = test-is-elf-cu.sh test-cdeps.sh
 check_DATA = hello.o howdy.o greet.o libgreet.la cdeps-a.h cdeps-b.h \
 	cdeps-c.h cdeps-a.c cdeps-c.c
 @ENABLE_SHELLCHECK_TRUE@SHELLCHECK_FILES = test-cdeps.sh \
-@ENABLE_SHELLCHECK_TRUE@	test-is-elf-cu.sh test-gen-la.sh
+@ENABLE_SHELLCHECK_TRUE@	test-is-elf-cu.sh
 @ENABLE_SHELLCHECK_TRUE@SHELLCHECK_FLAGS = --shell=sh
 all: all-am
 
@@ -838,13 +838,6 @@ test-is-elf-cu.sh.log: test-is-elf-cu.sh
 test-cdeps.sh.log: test-cdeps.sh
 	@p='test-cdeps.sh'; \
 	b='test-cdeps.sh'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
-test-gen-la.sh.log: test-gen-la.sh
-	@p='test-gen-la.sh'; \
-	b='test-gen-la.sh'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
