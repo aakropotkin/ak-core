@@ -1,24 +1,67 @@
+# ============================================================================ #
+#
+#
+#
+# ---------------------------------------------------------------------------- #
+
 {
+
+# ---------------------------------------------------------------------------- #
+
   description = "A handful of useful core utilities and scripts for Linux";
 
-  inputs.utils.url = github:numtide/flake-utils;
 
-  outputs = { self, nixpkgs, utils }:
-    let inherit (utils.lib) eachDefaultSystemMap;
+# ---------------------------------------------------------------------------- #
+
+  outputs = { nixpkgs, ... }: let
+
+# ---------------------------------------------------------------------------- #
+
+    eachSupportedSystemMap = let
+      supportedSystems = [
+        "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"
+      ];
+    in fn: let
+      proc = system: { name = system; value = fn system; };
+    in builtins.listToAttrs ( map proc supportedSystems );
+
+# ---------------------------------------------------------------------------- #
+
+    overlays.deps    = final: prev: {};
+    overlays.ak-core = final: prev: { ak-core = final.callPackage ./. {}; };
+    overlays.default = nixpkgs.lib.composeExtensions overlays.deps
+                                                     overlays.ak-core;
+
+
+# ---------------------------------------------------------------------------- #
+
+    nixosModules.ak-core = { nixpkgs.overlays = overlays.default; };
+    nixosModules.default = nixosModules.ak-core;
+
+
+# ---------------------------------------------------------------------------- #
+
+  in {
+
+    inherit overlays nixosModules;
+
+    packages = eachSupportedSystemMap ( system: let
+      pkgsFor = nixpkgs.legacyPackages.${system}.extend overlays.default;
     in {
-      packages = eachDefaultSystemMap ( system: {
-        ak-core = nixpkgs.legacyPackages.${system}.callPackage ./. {};
-        default = self.packages.${system}.ak-core;
-      } );
+      inherit (pkgsFor) ak-core;
+      default = pkgsFor.ak-core;
+    } );
 
-      overlays.ak-core = final: prev: {
-        ak-core = nixpkgs.legacyPackages.${final.system}.callPackage ./. {};
-      };
-      overlays.default = self.overlays.ak-core;
+  };  # End `outputs'
 
-      nixosModules.ak-core = { ... }: {
-        nixpkgs.overlays = self.overlays.ak-core;
-      };
-      nixosModules.default = self.nixosModules.ak-core;
-    };
+
+# ---------------------------------------------------------------------------- #
+
 }
+
+
+# ---------------------------------------------------------------------------- #
+#
+#
+#
+# ============================================================================ #
