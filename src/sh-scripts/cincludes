@@ -38,12 +38,12 @@ OPTIONS
 IGNORE_SYSTEM=;
 IGNORE_LOCAL=;
 
-while test "$#" -gt 1; do
+while test "$#" -gt 0; do
   case "$1" in
-    -h|--help)            usage;    exit 0; ;;
-    -h|--help|-u|--usage) usage -f; exit 0; ;;
-    -S|--no-system)       IGNORE_SYSTEM=:; ;;
-    -L|--no-local)        IGNORE_LOCAL=:; ;;
+    -h|--help)      usage -f; exit 0; ;;
+    -u|--usage)     usage;    exit 0; ;;
+    -S|--no-system) IGNORE_SYSTEM=:; ;;
+    -L|--no-local)  IGNORE_LOCAL=:; ;;
     --) break; ;;
     -*) echo "$as_me: Unrecognized argument '$1'" >&2; usage -f >&2; exit 1; ;;
     *)  break; ;;
