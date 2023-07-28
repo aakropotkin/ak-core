@@ -2,6 +2,7 @@
 # -*- mode: sh-shell; -*-
 # ============================================================================ #
 #
+# Scrape `#include' lines from file.
 #
 # ---------------------------------------------------------------------------- #
 
@@ -12,8 +13,9 @@ set -eu;
 as_me=cincludes;
 
 usage() {
-  echo "\
-Usage: $as_me FILE
+  usage_msg="Usage: $as_me [OPTIONS...] [-h|--help|-u|--usage] FILE";
+  if "${1:-}" != '-f'; then echo "$usage_msg"; return; fi
+  echo "$usage_msg
 
 Scrape \`#include' lines from file.
 
@@ -21,20 +23,42 @@ This is similar to \`gcc -M ...' except that it will not recursively
 process \`#include' lines, it will not print any includes which may result
 from particular compilers, and will not be sensitive to \`#if(|def|ndef)'
 lines which may conditionally include other files.
+
+OPTIONS
+  -L,--no-local   ignore local ( quoted ) includes
+  -S,--no-system  ignore local ( quoted ) includes
+  -h,--help       show this help message
+  -u,--usage      show brief usage message
 ";
 }
 
 
 # ---------------------------------------------------------------------------- #
 
-if test "$#" != 1; then
+IGNORE_SYSTEM=;
+IGNORE_LOCAL=;
+
+while test "$#" -gt 1; do
+  case "$1" in
+    -h|--help)            usage;    exit 0; ;;
+    -h|--help|-u|--usage) usage -f; exit 0; ;;
+    -S|--no-system)       IGNORE_SYSTEM=:; ;;
+    -L|--no-local)        IGNORE_LOCAL=:; ;;
+    --) break; ;;
+    -*) echo "$as_me: Unrecognized argument '$1'" >&2; usage -f >&2; exit 1; ;;
+    *)  break; ;;
+  esac
+  shift;
+done
+
+if test "$#" -ne 1; then
   usage >&2;
   exit 1;
 fi
 
-if test "$1" = "-h" || test "$1" = "--help"; then
-  usage;
-  exit 0;
+if test "$IGNORE_SYSTEM$IGNORE_LOCAL" = '::'; then
+  echo "$as_me: --no-system and --no-local options cannot be used together" >&2;
+  exit 1;
 fi
 
 
@@ -71,6 +95,16 @@ _wslines() {
   tr -s '\t' ' ' < /dev/stdin|sed -e 's/^ \+//' -e 's/ \+$//'|tr ' ' '\n';
 }
 
+_doignores() {
+  if test -z "$IGNORE_SYSTEM$IGNORE_LOCAL"; then
+    cat < /dev/stdin;
+  elif test -n "$IGNORE_SYSTEM"; then
+    grep -v '<' < /dev/stdin;
+  else
+    grep -v '"' < /dev/stdin;
+  fi
+}
+
 _getsymbols() {
   sed -e 's:^"\([^"]\+\)"$:\1:' -e 's:^<\([^"]\+\)>$:\1:' < /dev/stdin;
 }
@@ -78,11 +112,19 @@ _getsymbols() {
 
 # ---------------------------------------------------------------------------- #
 
-_joinlines "$TARGET"|_matchpp|_strippp|_rmcomments|_wslines|_getsymbols;
+_joinlines "$TARGET"  \
+  |_matchpp           \
+  |_strippp           \
+  |_rmcomments        \
+  |_wslines           \
+  |_doignores         \
+  |_getsymbols        \
+;
 
 
 # ---------------------------------------------------------------------------- #
-
-
+#
+#
+#
 # ============================================================================ #
 # vim: set filetype=sh :
