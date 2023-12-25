@@ -667,6 +667,7 @@ lt_obj_subdir
 SHELLCHECK
 ENABLE_SHELLCHECK_FALSE
 ENABLE_SHELLCHECK_TRUE
+MISSING
 AUTOM4TE
 CPP
 CXXCPP
@@ -822,6 +823,7 @@ CXXFLAGS
 CCC
 CXXCPP
 CPP
+MISSING
 SHELLCHECK'
 
 
@@ -1490,6 +1492,7 @@ Some influential environment variables:
   CXXFLAGS    C++ compiler flags
   CXXCPP      C++ preprocessor
   CPP         C preprocessor
+  MISSING     how to invoke a missing program
   SHELLCHECK  shellcheck linter
 
 Use these variables to override the choices made by `configure' or to help
@@ -18122,19 +18125,74 @@ then :
 else $as_nop
   SHELLCHECK="`command -v shellcheck`"
 fi
+
+
+
+# Extract the first word of "missing", so it can be a program name with args.
+set dummy missing; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_MISSING+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  case $MISSING in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_MISSING="$MISSING" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy=""$PATH:${ac_aux_dir?}""
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_MISSING="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_MISSING" && ac_cv_path_MISSING="as_fn_error $? "missing not found" "$LINENO" 5"
+  ;;
+esac
+fi
+MISSING=$ac_cv_path_MISSING
+if test -n "$MISSING"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $MISSING" >&5
+printf "%s\n" "$MISSING" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+
+
 # Check whether --enable-shellcheck was given.
 if test ${enable_shellcheck+y}
 then :
-  enableval=$enable_shellcheck; case "$enableval" in
-    yes) enable_shellcheck=yes; ;;
-    no)  enable_shellcheck=no;  ;;
-    *) as_fn_error $? "bad value $enableval for --enable-shellcheck" "$LINENO" 5; ;;
-  esac
+  enableval=$enable_shellcheck; case "$enableval" in #(
+  yes) :
+    enable_shellcheck=yes ;; #(
+  no) :
+    enable_shellcheck=no ;; #(
+  *) :
+    as_fn_error $? "bad value $enableval for --enable-shellcheck" "$LINENO" 5 ;;
+esac
 else $as_nop
   enable_shellcheck=no
 fi
 
- if test "x$enable_shellcheck" = "xyes"; then
+ if test "$enable_shellcheck" = "yes"; then
   ENABLE_SHELLCHECK_TRUE=
   ENABLE_SHELLCHECK_FALSE='#'
 else

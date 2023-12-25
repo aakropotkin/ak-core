@@ -89,7 +89,8 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = src/m4sugar
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/m4/ak_prog_shellcheck.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/m4/ak_prog_missing.m4 \
+	$(top_srcdir)/m4/ak_prog_shellcheck.m4 \
 	$(top_srcdir)/m4/autom4te.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
@@ -231,6 +232,7 @@ LTLIBOBJS = @LTLIBOBJS@
 LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
+MISSING = @MISSING@
 MKDIR_P = @MKDIR_P@
 NM = @NM@
 NMEDIT = @NMEDIT@

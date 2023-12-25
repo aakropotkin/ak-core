@@ -1,21 +1,28 @@
 #! /usr/bin/env sh
 # -*- mode: sh-shell; -*-
 # ============================================================================ #
+#
+# Print header dependencies for C/C++ file.
+#
+#
+# ---------------------------------------------------------------------------- #
 
+set -eu
+set -o pipefail
 
 # ---------------------------------------------------------------------------- #
 
-as_me=cdeps;
+_as_me="cdeps";
 
+_version="1.0.0";
 
-# ---------------------------------------------------------------------------- #
+_usage_msg="USAGE: $_as_me [OPTION...] FILE [-- CFLAGS]
 
-usage() {
-  echo "\
-Usage: $as_me [OPTION...] FILE [-- CFLAGS]
 Print header dependencies for C/C++ file.
+";
 
-Options:
+_help_msg="
+OPTIONS:
   -s, --system   Include system headers in output. Equivelant to \`gcc -MM'.
   -C, --cxx      Process as C++ file.
   -D, --defines  Scape \`#ifdef' symbols and set all to 1.
@@ -24,78 +31,104 @@ Options:
 
 Compiler tries \`CC' or \`CXX' if \`--cxx' was indicated, if unset these fall
 back to \`gcc' and \`g++' respectively.
+
+ENVIRONMENT
+  REALPATH            Command used as \`realpath' executable.
+  CC                  Command used as \`cc' executable.
+  CXX                 Command used as \`c++' executable.
+  TR                  Command used as \`tr' executable.
+  SED                 Command used as \`sed' executable.
+  GREP                Command ugrep as \`grep' executable.
 ";
+
+
+# ---------------------------------------------------------------------------- #
+
+usage() {
+  if [[ "${1:-}" = "-f" ]]; then
+    echo "$_help_msg";
+  else
+    echo "$_usage_msg";
+  fi
 }
+
+# ---------------------------------------------------------------------------- #
+
+# @BEGIN_INJECT_UTILS@
+: "${REALPATH:=realpath}";
+: "${CC:=cc}";
+: "${CXX:=c++}";
+: "${TR:=tr}";
+: "${SED:=sed}";
+: "${GREP:=grep}";
 
 
 # ---------------------------------------------------------------------------- #
 
 # Option settings
-TARGET=;
-SYSDEPS=;
-DO_CXX=;
-DEFINES=;
+_TARGET=;
+_SYSDEPS=;
+_DO_CXX=;
+_DEFINES=;
 
 
 # ---------------------------------------------------------------------------- #
-
-# Split options
-LONG_OPTS='-l help -l system -l cxx -l defines'
-# FIXME: this assumes GNU implementation
-OPTIONS=$( getopt -n "$as_me" "$LONG_OPTS" -o 'shCD' -- "$@"; );
-VALID_OPTIONS="$?";
-
-if test "$VALID_OPTIONS" != 0; then
-  echo "$as_me: encountered invalid options" > /dev/stderr;
-  usage > /dev/stderr;
-  exit 1;
-fi
-
 
 # Parse options
-eval set -- "$OPTIONS";
-while :; do
-  case "$1" in
-    -h|--help)
-      usage;
-      exit 0;
-    ;;
-    -s|--system)
-      SYSDEPS=:;
-    ;;
-    -C|--cxx)
-      DO_CXX=:;
-    ;;
-    -D|--defines)
-      DEFINES=:;
-    ;;
-    --)
-      shift;
-      break;
-    ;;
-    *)
-      if test -z "$TARGET"; then
-        TARGET="$1";
-      else
-        echo "$as_me: unexpected option: $1" > /dev/stderr;
-        usage > /dev/stderr;
-        exit 1;
-      fi
-    ;;
-  esac
-  shift;
-done
 
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+  # Split short options such as `-abc' -> `-a -b -c'
+  -[^-]?*)
+    _arg="$1";
+    declare -a _args;
+    _args=();
+    shift;
+    _i=1;
+    while [[ "$_i" -lt "${#_arg}" ]]; do
+      _args+=("-${_arg:$_i:1}");
+      _i="$((_i + 1))";
+    done
+    set -- "${_args[@]}" "$@";
+    unset _arg _args _i;
+    continue;
+  ;;
+  --*=*)
+    _arg="$1";
+    shift;
+    set -- "${_arg%%=*}" "${_arg#*=}" "$@";
+    unset _arg;
+    continue;
+  ;;
+  -u|--usage)   usage;    exit 0; ;;
+  -h|--help)    usage -f; exit 0; ;;
+  -v|--version) echo "$_version"; exit 0; ;;
+  --)           shift; break; ;;
+  -s|--system)  _SYSDEPS=:; ;;
+  -C|--cxx)     _DO_CXX=:; ;;
+  -D|--defines) _DEFINES=:; ;;
+  -?|--*)
+    echo "$_as_me: Unrecognized option: \`$1'" >&2;
+    usage -f >&2;
+    exit 1;
+  ;;
+  *)
+    if [[ -z "$_TARGET" ]]; then
+      _TARGET="$1";
+    else
+      echo "$_as_me: Unexpected argument(s) \`$*'" >&2;
+      usage -f >&2
+      exit 1
+    fi
+  ;;
+  esac
+  shift
+done
 
 # ---------------------------------------------------------------------------- #
 
-if test -z "$TARGET"; then
-  TARGET="$1";
-  shift;
-fi
-
 # Strip off leading `./' or any other wonky pathname stuff that `CC -M' drops.
-TARGET=$( realpath --relative-to "$PWD" "$TARGET"; );
+_TARGET="$( realpath --relative-to "$PWD" "$_TARGET"; )";
 
 
 # Remaining args are considered compiler flags
@@ -106,7 +139,7 @@ fi
 
 # ---------------------------------------------------------------------------- #
 
-if test "$SYSDEPS"; then
+if test "$_SYSDEPS"; then
   CFLAGS="${CFLAGS+$CFLAGS }-M";
 else
   CFLAGS="${CFLAGS+$CFLAGS }-MM";
@@ -116,38 +149,38 @@ fi
 # ---------------------------------------------------------------------------- #
 
 # Select compiler
-if test "$DO_CXX"; then
-  CC="${CXX:-$( which g++; )}";
+if test "$_DO_CXX"; then
+  COMPILER="${CXX:-$( command -v c++; )}";
 else
-  : "${CC:=$( which gcc; )}";
+  COMPILER="${CC:-$( command -v cc; )}";
 fi
 
 
 # ---------------------------------------------------------------------------- #
 
 _getifnames() {
-  ifnames "$TARGET" 2>/dev/null|cut -d' ' -f1;
+  ifnames "$_TARGET" 2>/dev/null|cut -d' ' -f1;
 }
 
 
 _joinlines() {
-  sed ':x; /\\$/ { N; s/\\\n//; tx }' /dev/stdin;
+  $SED ':x; /\\$/ { N; s/\\\n//; tx }' /dev/stdin;
 }
 
 _wslines() {
-  tr -s '\t' ' ' < /dev/stdin         \
-    |sed -e 's/^ \+//' -e 's/ \+$//'  \
-    |tr ' ' '\n';
+  $TR -s '\t' ' ' < /dev/stdin         \
+    |$SED -e 's/^ \+//' -e 's/ \+$//'  \
+    |$TR ' ' '\n';
 }
 
 _getdeps() {
   # Remove the target file and fake target.
   # Suppress debug output from CPP.
-  $CC -MT '' "$TARGET" "$CFLAGS"|sed -e 's/^: //';
+  $COMPILER -MT '' "$_TARGET" "$CFLAGS"|sed -e 's/^: //';
 }
 
 _getdeps_post() {
-  _getdeps|_joinlines|_wslines|grep -v "^${TARGET#\.#\\\.}\$";
+  _getdeps|_joinlines|_wslines|grep -v "^${_TARGET#\.#\\\.}\$";
 }
 
 
@@ -156,7 +189,7 @@ _getdeps_post() {
 # Scrape `#ifdef' symbols and set all of them to 1 using `-D<NAME>'.
 # This is far from exhaustive considering that combinations of these symbols
 # might be incompatible; but this covers a large number of use cases.
-if test "$DEFINES"; then
+if test "$_DEFINES"; then
   # FIXME: Permutate over defines
   #CFLAGS_SAVED="${CFLAGS}";
   for d in $( _getifnames; ); do
@@ -171,8 +204,8 @@ _getdeps_post;
 
 
 # ---------------------------------------------------------------------------- #
-
-
-
+#
+#
+#
 # ============================================================================ #
 # vim: set filetype=sh :

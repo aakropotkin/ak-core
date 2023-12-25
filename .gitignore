@@ -11,3 +11,6 @@ libtool
 .deps/
 .libs/
 *.trs
+config.log
+*.log
+*.o

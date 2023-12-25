@@ -2,7 +2,7 @@
 stdenv.mkDerivation {
   pname = "ak-core";
   src = ./.;
-  version = "0.3.0";
+  version = "0.3.1";
   nativeBuildInputs = [autoreconfHook];
   depsTargetTarget = [gawk];
   preInstall = ''

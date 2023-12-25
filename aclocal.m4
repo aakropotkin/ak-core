@@ -1148,6 +1148,7 @@ AC_SUBST([am__tar])
 AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
+m4_include([m4/ak_prog_missing.m4])
 m4_include([m4/ak_prog_shellcheck.m4])
 m4_include([m4/autom4te.m4])
 m4_include([m4/libtool.m4])
