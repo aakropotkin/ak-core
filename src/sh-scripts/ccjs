@@ -131,7 +131,7 @@ else
     echo "      .c .h .cc .cpp .hpp .cxx .hxx .c++ .h++ .ipp";
     echo "Falling back to normal \`$CCJS_COMPILER' invocation."
   } >&2;
-    exec "$CCJS_COMPILER" "${_cc_args[@]}";
+    exec "$CCJS_COMPILER" "$@";
 fi
 
 # Users can omit `-o' if they're using `-c'.
@@ -184,7 +184,7 @@ fi
 # ---------------------------------------------------------------------------- #
 
 if [[ -z "${CCJS_DONT_COMPILE:-}" ]]; then
-  exec "$CCJS_COMPILER" "${_cc_args[@]}";
+  exec "$CCJS_COMPILER" "$@";
 fi
 
 
