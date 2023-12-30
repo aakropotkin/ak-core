@@ -14,6 +14,12 @@
 
 @SET_MAKE@
 
+# ============================================================================ #
+#
+#
+#
+# ---------------------------------------------------------------------------- #
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -502,6 +508,12 @@ uninstall-am: uninstall-dist_jqDATA
 
 .PRECIOUS: Makefile
 
+
+# ---------------------------------------------------------------------------- #
+#
+#
+#
+# ============================================================================ #
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -13,6 +13,12 @@
 # PARTICULAR PURPOSE.
 
 @SET_MAKE@
+
+# ============================================================================ #
+#
+#
+#
+# ---------------------------------------------------------------------------- #
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -1040,6 +1046,12 @@ libgreet_paths: libgreet.la
 # check-am assures that all test scripts and other resources are built.
 @ENABLE_SHELLCHECK_TRUE@check-local: $(SHELLCHECK_FILES)
 @ENABLE_SHELLCHECK_TRUE@	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_FILES)
+
+# ---------------------------------------------------------------------------- #
+#
+#
+#
+# ============================================================================ #
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

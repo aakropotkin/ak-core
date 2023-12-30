@@ -4,9 +4,11 @@
 #
 # ---------------------------------------------------------------------------- #
 
-ACLOCAL_AMFLAGS = -I m4
+# TODO: Inline helper scripts.
+ccjs: main.bash
+	cp $< $@
 
-SUBDIRS = src doc/sh-scripts
+bin_SCRIPTS = ccjs ccjs-wrap
 
 
 # ---------------------------------------------------------------------------- #

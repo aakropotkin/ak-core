@@ -40,6 +40,7 @@ AC_CONFIG_FILES([Makefile
                  src/m4sugar/test/Makefile
                  src/sh-scripts/Makefile
                  src/sh-scripts/test/Makefile
+                 src/sh-scripts/ccjs/Makefile
                  src/zsh-scripts/Makefile
                  src/awk-scripts/Makefile
                  src/jq/Makefile

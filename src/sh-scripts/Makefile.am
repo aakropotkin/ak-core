@@ -1,9 +1,14 @@
+# ============================================================================ #
+#
+#
+#
+# ---------------------------------------------------------------------------- #
 
 bin_SCRIPTS =  cuts displays joinlines lorder wsmerge json-syms
 bin_SCRIPTS += cdeps trim wslines cincludes ak-ifnames get-m4-path get-m4-files
 bin_SCRIPTS += drop-until cdecls lines-prefix racu
 bin_SCRIPTS += elf-cflags symlink-samedir-p has-programs nextlink
-bin_SCRIPTS += iface_ips_json sha256dir ccjs
+bin_SCRIPTS += iface_ips_json sha256dir
 
 # M4SH generated scripts
 IS_ELF_TARGETS = is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
@@ -13,7 +18,7 @@ bin_SCRIPTS += is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
 bin_SCRIPTS += needs rpath soname
 CLEANFILES   =  $(M4SH_TARGETS)
 
-SUBDIRS = test
+SUBDIRS = test ccjs
 
 M4SUGAR_DIR = $(top_srcdir)/src/m4sugar
 
@@ -56,3 +61,10 @@ SHELLCHECK_FLAGS = --shell=sh
 check-local: $(SHELLCHECK_FILES)
 	$(SHELLCHECK) $(SHELLCHECK_FLAGS) $(SHELLCHECK_FILES)
 endif
+
+
+# ---------------------------------------------------------------------------- #
+#
+#
+#
+# ============================================================================ #
