@@ -39,6 +39,7 @@ ENVIRONMENT
   CCJS_OUT            Output file. Default: \`./compile_commands.json'.
   CCJS_DONT_COMPILE   Do not compile, just generate \`compile_commands.json'.
   CCJS_COMPILER       Command used as compiler executable. Defaults to \`\$CC'.
+  CCJS_SILENT         Do not print any extra messages to STDERR.
   CC                  Command used as \`cc' executable.
   JQ                  Command used as \`jq' executable.
   REALPATH            Command used as \`realpath' executable.
@@ -123,7 +124,7 @@ done
 
 if [[ -n "${_TARGET_FILE}" ]]; then
   _TARGET_FILE="$("$REALPATH" "$_TARGET_FILE"; )";
-else
+elif [[ -z "${CCJS_SILENT:-}" ]]; then
   {
     echo "$_as_me: Could not determine the target file.";
     printf '      You must use a source file with one of the ';

@@ -14,3 +14,4 @@ libtool
 config.log
 *.log
 *.o
+result
