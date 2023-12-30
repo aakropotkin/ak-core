@@ -64,26 +64,34 @@ usage() {
 
 # ---------------------------------------------------------------------------- #
 
-declare -a tmp_files tmp_dirs;
-tmp_files=();
-tmp_dirs=();
+_TMP_FILES='';
+_TMP_DIRS='';
+export _TMP_FILES _TMP_DIRS;
 
+#shellcheck disable=SC2120
 mktmp_auto() {
-  local _f;
-  _f="$( $MKTEMP "$@"; )";
+  local _tmp;
+  _tmp="$( $MKTEMP "$@"; )";
   case " $* " in
-    *\ -d\ *|*\ --directory\ *) tmp_dirs+=( "$_f" ); ;;
-    *)                          tmp_files+=( "$_f" ); ;;
+    *\ -d\ *|*\ --directory\ *) export _TMP_DIRS="$_TMP_DIRS:$_tmp"; ;;
+    *)                          export _TMP_FILES="$_TMP_FILES:$_tmp"; ;;
   esac
-  echo "$_f";
+  echo "$_tmp";
 }
 
 
 # ---------------------------------------------------------------------------- #
 
 cleanup() {
-  rm -f "${tmp_files[@]}";
-  rm -rf "${tmp_dirs[@]}";
+  local _tmp_files _tmp_dirs;
+  if [[ -n "$_TMP_FILES" ]]; then
+    IFS=':' read -ra _tmp_files <<< "$_TMP_FILES";
+    rm -f "${_tmp_files[@]}";
+  fi
+  if [[ -n "$_TMP_DIRS" ]]; then
+    IFS=':' read -ra _tmp_dirs <<< "$_TMP_DIRS";
+    rm -rf "${_tmp_dirs[@]}";
+  fi
 }
 
 _es=0;
@@ -118,15 +126,9 @@ fi
 
 # ---------------------------------------------------------------------------- #
 
-# Add sub-command
+# Add sub-commands
 
-ccjs_add() {
-  local _file;
-  _file="$1";
-  shift;
-  declare -a _flags;
-  _flags=( "$@" );
-}
+. "${BASH_SOURCE[0]%/*}/ccjs_add";
 
 
 # ---------------------------------------------------------------------------- #
@@ -169,7 +171,11 @@ while [[ "$#" -gt 0 ]]; do
       usage -f >&2;
       exit 1;
     ;;
-    add|remove|list|show) break; ;;
+    add)
+      shift;
+      ccjs_add "$@";
+      exit "$?";
+    ;;
     *)
       echo "$_as_me: Unexpected argument(s) '$*'" >&2;
       usage -f >&2;
@@ -178,76 +184,6 @@ while [[ "$#" -gt 0 ]]; do
   esac
   shift;
 done
-
-
-# ---------------------------------------------------------------------------- #
-
-if [[ -n "${_TARGET_FILE}" ]]; then
-  _TARGET_FILE="$("$REALPATH" "$_TARGET_FILE"; )";
-elif [[ -z "${CCJS_SILENT:-}" ]]; then
-  {
-    echo "$_as_me: Could not determine the target file.";
-    printf '      You must use a source file with one of the ';
-    echo "following extensions:";
-    echo "      .c .h .cc .cpp .hpp .cxx .hxx .c++ .h++ .ipp";
-    echo "Falling back to normal \`$CCJS_COMPILER' invocation."
-  } >&2;
-    exec "$CCJS_COMPILER" "${_cc_args[@]}";
-fi
-
-# Users can omit `-o' if they're using `-c'.
-if [[ -n "${_OUTPUT_FILE:-}" ]]; then
-  _OUTPUT_FILE="$("$REALPATH" "$_OUTPUT_FILE"; )";
-else
-  _OUTPUT_FILE="${_TARGET_FILE#.*}.o";
-fi
-
-
-# ---------------------------------------------------------------------------- #
-
-_ARGS='';
-for _arg in "${_cc_args[@]}"; do
-  if [[ -n "$_ARGS" ]]; then
-    _ARGS="$_ARGS,";
-  fi
-  # Escape double quotes.
-  _ARGS="$_ARGS\"${_arg//\"/\\\"}\"";
-done
-
-_ENTRY="{
-  \"directory\": \"$PWD\",
-  \"file\": \"$_TARGET_FILE\",
-  \"output\": \"$_OUTPUT_FILE\",
-  \"arguments\": [$_ARGS]
-}";
-
-
-# ---------------------------------------------------------------------------- #
-
-# If the file doesn't exist create it.
-if ! [[ -f "$CCJS_OUT" ]]; then
-  echo "[$_ENTRY]" > "$CCJS_OUT";
-else
-  #shellcheck disable=SC2119
-  TMPFILE="$( mktmp_auto; )";
-
-  # Add the entry to the file, and remove old entry ( if present ).
-  $JQ --argjson _ENTRY "$_ENTRY" "[\$_ENTRY] + .|unique_by( .output )"  \
-        "$CCJS_OUT" > "$TMPFILE";
-
-  # Backup the original file.
-  mv "$CCJS_OUT" "$CCJS_OUT~";
-
-  # Overwrite the original file.
-  mv "$TMPFILE" "$CCJS_OUT";
-fi
-
-
-# ---------------------------------------------------------------------------- #
-
-if [[ -z "${CCJS_DONT_COMPILE:-}" ]]; then
-  exec "$CCJS_COMPILER" "${_cc_args[@]}";
-fi
 
 
 # ---------------------------------------------------------------------------- #
