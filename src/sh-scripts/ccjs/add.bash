@@ -54,7 +54,7 @@ usage() {
 # ---------------------------------------------------------------------------- #
 
 # @BEGIN_INJECT_UTILS@
-: "${GREP:=grep}";
+: "${JQ:=JQ}";
 : "${REALPATH:=realpath}";
 : "${MKTEMP:=mktemp}";
 
