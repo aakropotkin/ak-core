@@ -149,6 +149,7 @@ for _arg in "${_cc_args[@]}"; do
   if [[ -n "$_ARGS" ]]; then
     _ARGS="$_ARGS,";
   fi
+  # Escape double quotes.
   _ARGS="$_ARGS\"${_arg//\"/\\\"}\"";
 done
 
