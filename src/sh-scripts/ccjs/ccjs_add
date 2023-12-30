@@ -17,19 +17,19 @@ set -o pipefail;
 
 if [[ "${BASH_SOURCE[0]}" = "$0" ]]; then
   _as_me="ccjs_add";
-  _usage_msg_add="USAGE: $_as_me [CMD-OPTIONS]... FILE OUTPUT DIRECTORY \
+  _usage_add_msg="USAGE: $_as_me [CMD-OPTIONS]... FILE OUTPUT DIRECTORY \
 ARGS...";
 else
-  _usage_msg_add="USAGE: ${_as_me:-ccjs} [OPTIONS...] add [CMD-OPTIONS]... \
+  _usage_add_msg="USAGE: ${_as_me:-ccjs} [OPTIONS...] add [CMD-OPTIONS]... \
 FILE OUTPUT DIRECTORY ARGS...";
 fi
 
-_usage_msg_add="$_usage_msg_add
+_usage_add_msg="$_usage_add_msg
 
 Add entry to \`compile_commands.json'.
 ";
 
-_help_msg_add="$_usage_msg_add
+_help_add_msg="$_usage_add_msg
 Replaces existing entry if it exists.
 
 When \`--in-place' is specified, \`compile_commands.json' is modified in-place
@@ -58,9 +58,9 @@ ENVIRONMENT
 
 usage_add() {
   if [[ "${1:-}" = "-f" ]]; then
-    echo "$_help_msg_add";
+    echo "$_help_add_msg";
   else
-    echo "$_usage_msg_add";
+    echo "$_usage_add_msg";
   fi
 }
 
