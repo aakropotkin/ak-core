@@ -139,7 +139,7 @@ if ! [[ -f "$CCJS_OUT" ]]; then
   echo "[$_ENTRY]" > "$CCJS_OUT";
 else
   #shellcheck disable=SC2119
-  TMPFILE="$( mktmp_auto; )";
+  TMPFILE="$( $MKTEMP; )";
 
   _es=0;
   trap '_es="$?"; rm -f "$TMPFILE"; exit "$_es";' HUP TERM INT QUIT EXIT;
