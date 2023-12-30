@@ -169,7 +169,7 @@ else
   #shellcheck disable=SC2119
   TMPFILE="$( mktmp_auto; )";
 
-  # Convert to object and back to deduplicate.
+  # Add the entry to the file, and remove old entry ( if present ).
   $JQ --argjson _ENTRY "$_ENTRY" "[\$_ENTRY] + .|unique_by( .output )"  \
         "$CCJS_OUT" > "$TMPFILE";
 
