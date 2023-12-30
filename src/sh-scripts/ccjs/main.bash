@@ -23,16 +23,17 @@ Operate on \`compile_commands.json' files.
 
 #shellcheck disable=SC2140
 _help_msg="$_usage_msg
-COMMANDS
-  add FILE FLAGS      Add entry to \`compile_commands.json'.
-  remove FILE         Remove entries from \`compile_commands.json'.
-  list                List all entries in \`compile_commands.json'.
-  show FILE           Show entry from \`compile_commands.json'.
 
 OPTIONS
   -h,--help           Print help message to STDOUT.
   -u,--usage          Print usage message to STDOUT.
   -v,--version        Print version information to STDOUT.
+
+COMMANDS
+  add FILE FLAGS      Add entry to \`compile_commands.json'.
+  remove FILE         Remove entries from \`compile_commands.json'.
+  list                List all entries in \`compile_commands.json'.
+  show FILE           Show entry from \`compile_commands.json'.
 
 ENVIRONMENT
   CCJS_OUT            Output file. Default: \`./compile_commands.json'.
@@ -56,8 +57,6 @@ usage() {
 # ---------------------------------------------------------------------------- #
 
 # @BEGIN_INJECT_UTILS@
-# TOOD: search "up" to project root to find `compile_commands.json' file.
-: "${CCJS_OUT:=$PWD/compile_commands.json}";
 : "${JQ:=jq}";
 : "${REALPATH:=realpath}";
 : "${MKTEMP:=mktemp}";
@@ -93,13 +92,35 @@ trap '_es="$?"; cleanup; exit "$_es";' HUP TERM INT QUIT EXIT;
 
 # ---------------------------------------------------------------------------- #
 
+# Set the output file.
+
+if [[ -n "${CCJS_OUT:-}" ]]; then
+  CCJS_OUT="$( "$REALPATH" "$CCJS_OUT"; )";
+else
+  # Find nearest project root or `compile_commands.json' by searching "up".
+  _dir="$PWD";
+  while [[ "$_dir" != "/" ]]; do
+    if [[ -f "$_dir/compile_commands.json" ]]; then
+      CCJS_OUT="$_dir/compile_commands.json";
+      break;
+    elif [[ -d "$_dir/.git" ]]; then
+      CCJS_OUT="$_dir/compile_commands.json";
+      break;
+    elif [[ -d "$_dir/.root" ]]; then
+      CCJS_OUT="$_dir/compile_commands.json";
+      break;
+    fi
+  done
+  : "${CCJS_OUT:=$PWD/compile_commands.json}";
+  unset _dir;
+fi
 
 
 # ---------------------------------------------------------------------------- #
 
 # Add sub-command
 
-add() {
+ccjs_add() {
   local _file;
   _file="$1";
   shift;
