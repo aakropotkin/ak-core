@@ -17,6 +17,7 @@ setup() {
   pushd "$BATS_TEST_TMPDIR" > /dev/null 2>&1||return;
   # Mark the project root directory.
   touch .root;
+  refute "$TEST" -f compile_commands.json;
 }
 
 teardown() {
@@ -113,7 +114,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,init
 @test "create a new compile_commands.json" {
-  refute "$TEST" -f compile_commands.json;
   run "$CCJS" add main.cc;
   assert_success;
   refute "$TEST" -f compile_commands.json;
@@ -146,7 +146,6 @@ teardown() {
 
 # bats test_tags=ccjs:add
 @test "'ccjs add' without '-i' does not edit compile_commands.json" {
-  refute "$TEST" -f compile_commands.json;
   $CCJS add -i main.cc;
   assert "$TEST" -f compile_commands.json;
 
@@ -174,7 +173,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,init,inline
 @test "create a new compile_commands.json with '-i'" {
-  refute "$TEST" -f compile_commands.json;
   $CCJS add -i main.cc;
   $TEST -f compile_commands.json;
 }
@@ -193,8 +191,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,init,inline
 @test "'ccjs add FILE -- ARGS...' has correct fallbacks" {
-  refute "$TEST" -f compile_commands.json;
-
   $CCJS add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -231,8 +227,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,inline,multiple
 @test "'ccjs add' multiple times appends file" {
-  refute "$TEST" -f compile_commands.json;
-
   $CCJS add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -251,8 +245,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,inline,multiple
 @test "'ccjs add' updates existing file" {
-  refute "$TEST" -f compile_commands.json;
-
   "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -300,8 +292,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,inline
 @test "'ccjs add FILE OUTPUT -- ARGS...' works" {
-  refute "$TEST" -f compile_commands.json;
-
   $CCJS add -i src/main.cc src/foo.o -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -338,8 +328,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,inline
 @test "'ccjs add FILE OUTPUT DIRECTORY -- ARGS...' works" {
-  refute "$TEST" -f compile_commands.json;
-
   $CCJS add -i src/main.cc src/foo.o "$PWD/src" -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -376,8 +364,6 @@ teardown() {
 
 # bats test_tags=ccjs:add,inline
 @test "'ccjs add FILE OUTPUT DIRECTORY ARGS...' works" {
-  refute "$TEST" -f compile_commands.json;
-
   $CCJS add -i src/main.cc src/foo.o "$PWD/src" -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -414,8 +400,6 @@ teardown() {
 
 # bats test_tags=ccjs:remove,inline
 @test "'ccjs remove' removes entry" {
-  refute "$TEST" -f compile_commands.json;
-
   "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -434,8 +418,6 @@ teardown() {
 
 # bats test_tags=ccjs:remove,inline
 @test "'ccjs remove' on non-existent entry is a no-op" {
-  refute "$TEST" -f compile_commands.json;
-
   "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
@@ -454,8 +436,6 @@ teardown() {
 
 # bats test_tags=ccjs:remove,inline,multiple
 @test "'ccjs remove' takes multiple filenames" {
-  refute "$TEST" -f compile_commands.json;
-
   "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
   "$CCJS" add -i src/foo.cc -- -Iinclude -Wall;
 
@@ -475,8 +455,6 @@ teardown() {
 
 # bats test_tags=ccjs:remove
 @test "'ccjs remove' without '-i' does not edit compile_commands.json" {
-  refute "$TEST" -f compile_commands.json;
-
   "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
