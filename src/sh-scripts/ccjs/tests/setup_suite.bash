@@ -67,10 +67,7 @@ progs_setup() {
     : "${REALPATH:=realpath}";
     : "${RM:=rm -f}";
     : "${TEST:=test}";
-    : "${TRUE:=:}";
-    : "${FALSE:=false}";
     : "${JQ:=jq}";
-    : "${REALPATH:=realpath}";
     : "${MKTEMP:=mktemp}";
     : "${GREP:=grep}";
     : "${SED:=sed}";

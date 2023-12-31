@@ -144,6 +144,34 @@ teardown() {
 
 # ---------------------------------------------------------------------------- #
 
+# bats test_tags=ccjs:add
+@test "'ccjs add' without '-i' does not edit compile_commands.json" {
+  refute "$TEST" -f compile_commands.json;
+  $CCJS add -i main.cc;
+  assert "$TEST" -f compile_commands.json;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  unset output;
+  run "$CCJS" add foo.cc;
+  assert_success;
+  # Dump to junk file without modifying the original
+  echo "$output" > ./compile_commands.json~;
+  run "$JQ" -r 'length' compile_commands.json~;
+  assert_success;
+  assert_output '2';
+
+  # Original is unchanged
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
 # bats test_tags=ccjs:add,init,inline
 @test "create a new compile_commands.json with '-i'" {
   refute "$TEST" -f compile_commands.json;
@@ -154,7 +182,7 @@ teardown() {
 
 # ---------------------------------------------------------------------------- #
 
-# bats test_tags=ccjs:add,init,inline,missing
+# bats test_tags=ccjs:add,init,inline
 @test "'ccjs add' does not require files/directories to exist" {
   refute "$TEST" -d src;
   $CCJS add -i src/main.cc;
@@ -265,6 +293,206 @@ teardown() {
   run "$JQ" -r '.[0].arguments[2]' compile_commands.json;
   assert_success;
   assert_output '-Werror';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:add,inline
+@test "'ccjs add FILE OUTPUT -- ARGS...' works" {
+  refute "$TEST" -f compile_commands.json;
+
+  $CCJS add -i src/main.cc src/foo.o -- -Iinclude -Wall;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  run "$JQ" -r '.[0].file' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src/main.cc";
+
+  run "$JQ" -r '.[0].directory' compile_commands.json;
+  assert_success;
+  assert_output "$PWD";
+
+  run "$JQ" -r '.[0].output' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src/foo.o";
+
+  run "$JQ" -r '.[0].arguments|length' compile_commands.json;
+  assert_success;
+  assert_output '2';
+
+  run "$JQ" -r '.[0].arguments[0]' compile_commands.json;
+  assert_success;
+  assert_output '-Iinclude';
+
+  run "$JQ" -r '.[0].arguments[1]' compile_commands.json;
+  assert_success;
+  assert_output '-Wall';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:add,inline
+@test "'ccjs add FILE OUTPUT DIRECTORY -- ARGS...' works" {
+  refute "$TEST" -f compile_commands.json;
+
+  $CCJS add -i src/main.cc src/foo.o "$PWD/src" -- -Iinclude -Wall;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  run "$JQ" -r '.[0].file' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src/main.cc";
+
+  run "$JQ" -r '.[0].directory' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src";
+
+  run "$JQ" -r '.[0].output' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src/foo.o";
+
+  run "$JQ" -r '.[0].arguments|length' compile_commands.json;
+  assert_success;
+  assert_output '2';
+
+  run "$JQ" -r '.[0].arguments[0]' compile_commands.json;
+  assert_success;
+  assert_output '-Iinclude';
+
+  run "$JQ" -r '.[0].arguments[1]' compile_commands.json;
+  assert_success;
+  assert_output '-Wall';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:add,inline
+@test "'ccjs add FILE OUTPUT DIRECTORY ARGS...' works" {
+  refute "$TEST" -f compile_commands.json;
+
+  $CCJS add -i src/main.cc src/foo.o "$PWD/src" -Iinclude -Wall;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  run "$JQ" -r '.[0].file' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src/main.cc";
+
+  run "$JQ" -r '.[0].directory' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src";
+
+  run "$JQ" -r '.[0].output' compile_commands.json;
+  assert_success;
+  assert_output "$PWD/src/foo.o";
+
+  run "$JQ" -r '.[0].arguments|length' compile_commands.json;
+  assert_success;
+  assert_output '2';
+
+  run "$JQ" -r '.[0].arguments[0]' compile_commands.json;
+  assert_success;
+  assert_output '-Iinclude';
+
+  run "$JQ" -r '.[0].arguments[1]' compile_commands.json;
+  assert_success;
+  assert_output '-Wall';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:remove,inline
+@test "'ccjs remove' removes entry" {
+  refute "$TEST" -f compile_commands.json;
+
+  "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  "$CCJS" remove -i src/main.cc;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '0';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:remove,inline
+@test "'ccjs remove' on non-existent entry is a no-op" {
+  refute "$TEST" -f compile_commands.json;
+
+  "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  "$CCJS" remove -i src/foo.cc;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:remove,inline,multiple
+@test "'ccjs remove' takes multiple filenames" {
+  refute "$TEST" -f compile_commands.json;
+
+  "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
+  "$CCJS" add -i src/foo.cc -- -Iinclude -Wall;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '2';
+
+  "$CCJS" remove -i src/foo.cc src/main.cc;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '0';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:remove
+@test "'ccjs remove' without '-i' does not edit compile_commands.json" {
+  refute "$TEST" -f compile_commands.json;
+
+  "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  unset output;
+  run "$CCJS" remove src/main.cc;
+  assert_success;
+  assert_output '[]';
+
+  # Do not modify
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
 }
 
 

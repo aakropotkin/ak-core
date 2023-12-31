@@ -131,7 +131,6 @@ ccjs_remove() {
     # Overwrite the original file.
     mv "$TMPFILE" "$CCJS_OUT";
   else
-    echo "$JQ --argjson _FILES \"$_FILES\" \"$_JQ_CMD\" \"$CCJS_OUT\";" >&2;
     $JQ --argjson _FILES "$_FILES" "$_JQ_CMD" "$CCJS_OUT";
   fi
 }
