@@ -147,9 +147,8 @@ teardown() {
 # bats test_tags=ccjs:add,init,inline
 @test "create a new compile_commands.json with '-i'" {
   refute "$TEST" -f compile_commands.json;
-  run "$CCJS" add -i main.cc;
-  assert_success;
-  assert "$TEST" -f compile_commands.json;
+  $CCJS add -i main.cc;
+  $TEST -f compile_commands.json;
 }
 
 
@@ -158,8 +157,7 @@ teardown() {
 # bats test_tags=ccjs:add,init,inline,missing
 @test "'ccjs add' does not require files/directories to exist" {
   refute "$TEST" -d src;
-  run "$CCJS" add -i src/main.cc;
-  assert_success;
+  $CCJS add -i src/main.cc;
 }
 
 
@@ -168,8 +166,8 @@ teardown() {
 # bats test_tags=ccjs:add,init,inline
 @test "'ccjs add FILE -- ARGS...' has correct fallbacks" {
   refute "$TEST" -f compile_commands.json;
-  run "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
-  assert_success;
+
+  $CCJS add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
   assert_success;
@@ -206,15 +204,14 @@ teardown() {
 # bats test_tags=ccjs:add,inline,multiple
 @test "'ccjs add' multiple times appends file" {
   refute "$TEST" -f compile_commands.json;
-  run "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
-  assert_success;
+
+  $CCJS add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
   assert_success;
   assert_output '1';
 
-  run "$CCJS" add -i src/helper.cc -- -Iinclude -Wall;
-  assert_success;
+  $CCJS add -i src/helper.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
   assert_success;
@@ -227,8 +224,8 @@ teardown() {
 # bats test_tags=ccjs:add,inline,multiple
 @test "'ccjs add' updates existing file" {
   refute "$TEST" -f compile_commands.json;
-  run "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
-  assert_success;
+
+  "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
 
   run "$JQ" -r 'length' compile_commands.json;
   assert_success;
@@ -247,8 +244,7 @@ teardown() {
   assert_output '-Wall';
 
   # Update the entry
-  run "$CCJS" add -i src/main.cc -- -I../include -Wall -Werror;
-  assert_success;
+  "$CCJS" add -i src/main.cc -- -I../include -Wall -Werror;
 
   run "$JQ" -r 'length' compile_commands.json;
   assert_success;
