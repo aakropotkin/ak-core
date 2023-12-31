@@ -51,14 +51,12 @@ _bats_test_progs=();
 
 # Print the value of each program.
 print_progs() {
-  {
-    print_section_sep;
-    echo 'Programs:';
-    for prog in "${_bats_test_progs[@]}"; do
-      printf '  ';
-      print_var "$prog";
-    done
-  } >&3;
+  print_section_sep;
+  echo 'Programs:';
+  for prog in "${_bats_test_progs[@]}"; do
+    printf '  ';
+    print_var "$prog";
+  done
 }
 
 # Setup common programs as user overridable variables.
@@ -91,7 +89,7 @@ progs_setup() {
       eval "export $prog";
     done
 
-    print_progs;
+    print_progs >&3;
   fi
   export _RAN_PROGS_SETUP=1;
 }
@@ -113,13 +111,15 @@ ccjs_setup() {
 # ---------------------------------------------------------------------------- #
 
 setup_suite() {
-
+  # Greet the user.
   print_section_sep '=' >&3;
   echo "Initializing \`ccjs' Test Suite..." >&3;
 
+  # Setup the things.
   progs_setup;
   ccjs_setup;
 
+  # Print pre-test information.
   {
     print_section_sep;
     echo 'Starting tests...';
