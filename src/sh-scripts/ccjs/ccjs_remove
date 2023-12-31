@@ -66,6 +66,8 @@ usage_remove() {
 : "${JQ:=jq}";
 : "${REALPATH:=realpath}";
 : "${MKTEMP:=mktemp}";
+export JQ REALPATH MKTEMP;
+# @END_INJECT_UTILS@
 
 
 # ---------------------------------------------------------------------------- #
@@ -147,6 +149,8 @@ eval "$_OLD_OPTS";
 # If we are being run directly, run the function.
 if [[ "${BASH_SOURCE[0]}" = "$0" ]]; then
   ccjs_remove "$@";
+else
+  export -f ccjs_remove;
 fi
 
 

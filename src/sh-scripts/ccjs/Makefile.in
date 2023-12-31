@@ -288,7 +288,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-bin_SCRIPTS = ccjs ccjs-wrap
+bin_SCRIPTS = ccjs ccjs-wrap ccjs_add ccjs_remove
 all: all-am
 
 .SUFFIXES:
@@ -402,6 +402,7 @@ distdir-am: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 all-am: Makefile $(SCRIPTS)
 installdirs:
@@ -504,17 +505,17 @@ ps-am:
 
 uninstall-am: uninstall-binSCRIPTS
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	cscopelist-am ctags-am distclean distclean-generic \
-	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-binSCRIPTS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
+.PHONY: all all-am check check-am check-local clean clean-generic \
+	clean-libtool cscopelist-am ctags-am distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-binSCRIPTS \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
 	uninstall-am uninstall-binSCRIPTS
@@ -522,9 +523,20 @@ uninstall-am: uninstall-binSCRIPTS
 .PRECIOUS: Makefile
 
 
-# TODO: Inline helper scripts.
-ccjs: main.bash
-	cp $< $@
+# ---------------------------------------------------------------------------- #
+
+BATS       ?= bats
+BATSFLAGS  ?= --print-output-on-failure --verbose-run --timing
+BATS_TESTS ?= ./tests
+
+check-bats: $(bin_SCRIPTS) tests/setup_suite.bash $(widcard tests/*.bats)
+	CCJS=$(abs_builddir)/ccjs                \
+	CCJS_ADD=$(abs_builddir)/ccjs_add        \
+	CCJS_REMOVE=$(abs_builddir)/ccjs_remove  \
+	CCJS_WRAP=$(abs_builddir)/ccjs-wrap      \
+	  $(BATS) $(BATSFLAGS) $(BATS_TESTS)
+
+check-local: check-bats
 
 # ---------------------------------------------------------------------------- #
 #

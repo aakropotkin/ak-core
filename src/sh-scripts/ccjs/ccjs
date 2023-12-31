@@ -8,6 +8,7 @@
 
 set -eu;
 set -o pipefail;
+set -x;
 
 
 # ---------------------------------------------------------------------------- #
@@ -60,6 +61,7 @@ usage() {
 : "${JQ:=jq}";
 : "${REALPATH:=realpath}";
 : "${MKTEMP:=mktemp}";
+export JQ REALPATH MKTEMP;
 # @END_INJECT_UTILS@
 
 # @BEGIN_INJECT_PATH@
@@ -111,34 +113,30 @@ trap '_es="$?"; cleanup; exit "$_es";' HUP TERM INT QUIT EXIT;
 
 # Set the output file.
 
-if [[ -n "${CCJS_OUT:-}" ]]; then
-  CCJS_OUT="$( "$REALPATH" "$CCJS_OUT"; )";
-else
-  # Find nearest project root or `compile_commands.json' by searching "up".
-  _dir="$PWD";
-  while [[ "$_dir" != "/" ]]; do
-    if [[ -f "$_dir/compile_commands.json" ]]; then
-      CCJS_OUT="$_dir/compile_commands.json";
-      break;
-    elif [[ -d "$_dir/.git" ]]; then
-      CCJS_OUT="$_dir/compile_commands.json";
-      break;
-    elif [[ -d "$_dir/.root" ]]; then
-      CCJS_OUT="$_dir/compile_commands.json";
-      break;
-    fi
-  done
-  : "${CCJS_OUT:=$PWD/compile_commands.json}";
-  unset _dir;
-fi
-
-
-# ---------------------------------------------------------------------------- #
-
-# Add sub-commands
-
-. "${BASH_SOURCE[0]%/*}/ccjs_add";
-. "${BASH_SOURCE[0]%/*}/ccjs_remove";
+set_ccjs_out() {
+  if [[ -n "${CCJS_OUT:-}" ]]; then
+    CCJS_OUT="$( "$REALPATH" "$CCJS_OUT"; )";
+  else
+    # Find nearest project root or `compile_commands.json' by searching "up".
+    _dir="$PWD";
+    while [[ "${_dir:-/}" != "/" ]]; do
+      if [[ -f "$_dir/compile_commands.json" ]]; then
+        CCJS_OUT="$_dir/compile_commands.json";
+        break;
+      elif [[ -d "$_dir/.git" ]]; then
+        CCJS_OUT="$_dir/compile_commands.json";
+        break;
+      elif [[ -d "$_dir/.root" ]]; then
+        CCJS_OUT="$_dir/compile_commands.json";
+        break;
+      fi
+      _dir="${_dir%/*}";
+    done
+    : "${CCJS_OUT:=$PWD/compile_commands.json}";
+    unset _dir;
+    export CCJS_OUT;
+  fi
+}
 
 
 # ---------------------------------------------------------------------------- #
@@ -183,7 +181,16 @@ while [[ "$#" -gt 0 ]]; do
     ;;
     add)
       shift;
+      . "${BASH_SOURCE[0]%/*}/ccjs_add";
+      set_ccjs_out;
       ccjs_add "$@";
+      exit "$?";
+    ;;
+    remove)
+      shift;
+      . "${BASH_SOURCE[0]%/*}/ccjs_remove";
+      set_ccjs_out;
+      ccjs_remove "$@";
       exit "$?";
     ;;
     *)
