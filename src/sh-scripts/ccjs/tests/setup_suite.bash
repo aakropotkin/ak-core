@@ -107,6 +107,7 @@ ccjs_setup() {
 
 # ---------------------------------------------------------------------------- #
 
+# Run at the start of a `bats' invocation one or more files in this directory.
 setup_suite() {
   # Greet the user.
   print_section_sep '=' >&3;
@@ -123,6 +124,38 @@ setup_suite() {
     echo '';
   } >&3;
 }
+
+
+# ---------------------------------------------------------------------------- #
+
+# Common Hooks
+# ------------
+
+# Basic setup recommended for most tests.
+# It is exposed as a function so that it can be appended by a file's own
+# `setup' function(s).
+common_test_setup() {
+  mkdir -p "$BATS_TEST_TMPDIR";
+  pushd "$BATS_TEST_TMPDIR" > /dev/null 2>&1||return;
+  # Mark the project root directory.
+  touch .root;
+  refute "$TEST" -f compile_commands.json;
+}
+
+# Basic teardown recommended for use with `common_test_setup'.
+common_teardown() {
+  popd > /dev/null 2>&1||return;
+  $RM -r "$BATS_TEST_TMPDIR";
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# Set Default Hooks
+# -----------------
+
+setup() { common_test_setup; }
+teardown() { common_teardown; }
 
 
 # ---------------------------------------------------------------------------- #
