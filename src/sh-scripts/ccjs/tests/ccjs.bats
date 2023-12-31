@@ -202,6 +202,77 @@ teardown() {
 
 
 # ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:add,inline,multiple
+@test "'ccjs add' multiple times appends file" {
+  refute "$TEST" -f compile_commands.json;
+  run "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
+  assert_success;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  run "$CCJS" add -i src/helper.cc -- -Iinclude -Wall;
+  assert_success;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '2';
+}
+
+
+# ---------------------------------------------------------------------------- #
+
+# bats test_tags=ccjs:add,inline,multiple
+@test "'ccjs add' updates existing file" {
+  refute "$TEST" -f compile_commands.json;
+  run "$CCJS" add -i src/main.cc -- -Iinclude -Wall;
+  assert_success;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  run "$JQ" -r '.[0].arguments|length' compile_commands.json;
+  assert_success;
+  assert_output '2';
+
+  run "$JQ" -r '.[0].arguments[0]' compile_commands.json;
+  assert_success;
+  assert_output '-Iinclude';
+
+  run "$JQ" -r '.[0].arguments[1]' compile_commands.json;
+  assert_success;
+  assert_output '-Wall';
+
+  # Update the entry
+  run "$CCJS" add -i src/main.cc -- -I../include -Wall -Werror;
+  assert_success;
+
+  run "$JQ" -r 'length' compile_commands.json;
+  assert_success;
+  assert_output '1';
+
+  run "$JQ" -r '.[0].arguments|length' compile_commands.json;
+  assert_success;
+  assert_output '3';
+
+  run "$JQ" -r '.[0].arguments[0]' compile_commands.json;
+  assert_success;
+  assert_output '-I../include';
+
+  run "$JQ" -r '.[0].arguments[1]' compile_commands.json;
+  assert_success;
+  assert_output '-Wall';
+
+  run "$JQ" -r '.[0].arguments[2]' compile_commands.json;
+  assert_success;
+  assert_output '-Werror';
+}
+
+
+# ---------------------------------------------------------------------------- #
 #
 #
 #
