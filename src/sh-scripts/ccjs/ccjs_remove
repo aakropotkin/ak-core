@@ -73,7 +73,6 @@ export JQ REALPATH MKTEMP;
 # ---------------------------------------------------------------------------- #
 
 ccjs_remove() {
-
   _IN_PLACE='';
   declare -a _files;
   _files=();
@@ -106,7 +105,7 @@ ccjs_remove() {
   for _file in "${_files[@]}"; do
     case "$_file" in
       /*) :; ;;
-      *) _file="$( "$REALPATH" "$_file"; )"; ;;
+      *) _file="$( "$REALPATH" -m "$_file"; )"; ;;
     esac
     _FILES="${_FILES:+$_FILES, }\"$_file\"";
   done

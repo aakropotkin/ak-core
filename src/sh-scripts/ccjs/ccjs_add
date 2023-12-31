@@ -78,9 +78,6 @@ export JQ REALPATH MKTEMP;
 # ---------------------------------------------------------------------------- #
 
 ccjs_add() {
-
-  echo "ccjs_add $*" >&2;
-
   _IN_PLACE='';
   _FILE='';
   _OUTPUT='';
@@ -125,17 +122,17 @@ ccjs_add() {
   case "$_FILE" in
     "") echo "$_as_me: Missing FILE argument." >&2; usage_add >&2; exit 1; ;;
     /*) :; ;;
-    *) _FILE="$( "$REALPATH" "$_FILE"; )"; ;;
+    *) _FILE="$( "$REALPATH" -m "$_FILE"; )"; ;;
   esac
 
   case "${_OUTPUT:=${_FILE%.*}.o}" in
     /*) :; ;;
-    *) _OUTPUT="$( "$REALPATH" "$_OUTPUT"; )"; ;;
+    *) _OUTPUT="$( "$REALPATH" -m "$_OUTPUT"; )"; ;;
   esac
 
   case "${_DIRECTORY:=$PWD}" in
     /*) :; ;;
-    *) _DIRECTORY="$( "$REALPATH" "$_DIRECTORY"; )"; ;;
+    *) _DIRECTORY="$( "$REALPATH" -m "$_DIRECTORY"; )"; ;;
   esac
 
 
