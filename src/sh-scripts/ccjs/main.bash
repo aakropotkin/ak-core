@@ -60,6 +60,15 @@ usage() {
 : "${JQ:=jq}";
 : "${REALPATH:=realpath}";
 : "${MKTEMP:=mktemp}";
+# @END_INJECT_UTILS@
+
+# @BEGIN_INJECT_PATH@
+PATH="${PATH:+$PATH:}${BASH_SOURCE[0]%/*}";
+if [[ -d "${BASH_SOURCE[0]%/*}/../libexec" ]]; then
+  PATH="$PATH:${BASH_SOURCE[0]%/*}/../libexec";
+fi
+export PATH;
+# @END_INJECT_PATH@
 
 
 # ---------------------------------------------------------------------------- #
