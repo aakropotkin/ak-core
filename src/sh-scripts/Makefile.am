@@ -18,7 +18,7 @@ bin_SCRIPTS += is-elf-cu is-elf-so is-elf-ex is-elf-bin is-elf-ar
 bin_SCRIPTS += needs rpath soname
 CLEANFILES   =  $(M4SH_TARGETS)
 
-SUBDIRS = test ccjs
+SUBDIRS = test
 
 M4SUGAR_DIR = $(top_srcdir)/src/m4sugar
 
